@@ -20,50 +20,44 @@ Start with the basics: **[Kubernetes Learning Guide](docs/00-intro.md)**
 
 ## 📊 CKAD Exam Info
 
-| Property | Value |
-|----------|-------|
-| ⏱️ Duration | 2 hours |
-| 📝 Questions | ~15-20 |
-| 🎯 Passing Score | 66% |
-| 💻 Format | Hands-on (Terminal) |
-| 📚 Resources | kubernetes.io access ALLOWED |
+- ⏱️ **Duration:** 2 hours
+- 📝 **Questions:** ~15-20
+- 🎯 **Passing Score:** 66%
+- 💻 **Format:** Hands-on (Terminal)
+- 📚 **Resources:** kubernetes.io access ALLOWED
 
 ---
 
 ## 📋 Lab List (17 Labs, 100+ Exercises)
 
-### Week 1: Core Concepts
-| # | Lab | Topic |
-|---|-----|-------|
-| 01 | [Pod Basics](labs/lab-01-pod-basics.md) | Pod |
-| 02 | [Multi-Container](labs/lab-02-multi-container-pods.md) | Sidecar, Init |
-| 03 | [Deployments](labs/lab-03-deployments.md) | Scaling, Updates |
-| 04 | [Services](labs/lab-04-services.md) | ClusterIP, NodePort |
+### 🟢 Week 1: Core Concepts
 
-### Week 2: Configuration
-| # | Lab | Topic |
-|---|-----|-------|
-| 05 | [ConfigMaps & Secrets](labs/lab-05-configmaps-secrets.md) | Config |
-| 06 | [Volumes](labs/lab-06-volumes.md) | PV/PVC |
-| 09 | [Resource Limits](labs/lab-09-resource-limits.md) | CPU/Memory |
+- **Lab 01:** [Pod Basics](labs/lab-01-pod-basics.md) - Create and manage Pods
+- **Lab 02:** [Multi-Container Pods](labs/lab-02-multi-container-pods.md) - Sidecar, Init containers
+- **Lab 03:** [Deployments](labs/lab-03-deployments.md) - Scaling, Rolling updates
+- **Lab 04:** [Services](labs/lab-04-services.md) - ClusterIP, NodePort, LoadBalancer
 
-### Week 3: Advanced
-| # | Lab | Topic |
-|---|-----|-------|
-| 07 | [Jobs & CronJobs](labs/lab-07-jobs-cronjobs.md) | Batch |
-| 08 | [Probes](labs/lab-08-probes.md) | Health Checks |
-| 10 | [Network Policies](labs/lab-10-network-policies.md) | Firewall |
-| 11 | [Security](labs/lab-11-security.md) | SecurityContext |
+### 🟡 Week 2: Configuration
 
-### Week 4: Tools
-| # | Lab | Topic |
-|---|-----|-------|
-| 12 | [Ingress](labs/lab-12-ingress.md) | HTTP Routing |
-| 13 | [Debugging](labs/lab-13-debugging.md) | Troubleshooting |
-| 14 | [Helm](labs/lab-14-helm.md) | Charts |
-| 15 | [Deployment Strategies](labs/lab-15-deployment-strategies.md) | Blue-Green |
-| 16 | [Kustomize](labs/lab-16-kustomize.md) | Overlays |
-| 17 | [Dockerfile](labs/lab-17-dockerfile.md) | Containers |
+- **Lab 05:** [ConfigMaps & Secrets](labs/lab-05-configmaps-secrets.md) - External configuration
+- **Lab 06:** [Volumes](labs/lab-06-volumes.md) - PV, PVC, Storage
+- **Lab 09:** [Resource Limits](labs/lab-09-resource-limits.md) - CPU/Memory management
+
+### 🟠 Week 3: Advanced
+
+- **Lab 07:** [Jobs & CronJobs](labs/lab-07-jobs-cronjobs.md) - Batch processing
+- **Lab 08:** [Probes](labs/lab-08-probes.md) - Liveness, Readiness
+- **Lab 10:** [Network Policies](labs/lab-10-network-policies.md) - Pod firewall rules
+- **Lab 11:** [Security](labs/lab-11-security.md) - SecurityContext, ServiceAccounts
+
+### 🔴 Week 4: Tools
+
+- **Lab 12:** [Ingress](labs/lab-12-ingress.md) - HTTP/HTTPS routing
+- **Lab 13:** [Debugging](labs/lab-13-debugging.md) - Troubleshooting pods
+- **Lab 14:** [Helm](labs/lab-14-helm.md) - Package management
+- **Lab 15:** [Deployment Strategies](labs/lab-15-deployment-strategies.md) - Blue-Green, Canary
+- **Lab 16:** [Kustomize](labs/lab-16-kustomize.md) - Configuration overlays
+- **Lab 17:** [Dockerfile](labs/lab-17-dockerfile.md) - Container images
 
 ---
 
@@ -79,18 +73,27 @@ export now="--force --grace-period=0"
 k run nginx --image=nginx $do > pod.yaml
 k create deploy web --image=nginx --replicas=3
 k expose deploy web --port=80
+k create cm myconfig --from-literal=key=value
+k create secret generic mysecret --from-literal=pass=123
 ```
 
 ---
 
 ## 📊 Repository Stats
 
-| Metric | Value |
-|--------|-------|
-| 📚 Total Labs | 17 |
-| 📝 Exercises | 100+ |
-| 📊 Mermaid Diagrams | 30+ |
-| 📋 Curriculum Coverage | 100% |
+- 📚 **Total Labs:** 17
+- 📝 **Exercises:** 100+
+- 📊 **Diagrams:** 30+
+- 📋 **Curriculum Coverage:** 100%
+
+---
+
+## 📚 Additional Resources
+
+- [Kubernetes Docs](https://kubernetes.io/docs/) - Accessible during exam!
+- [kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+- [Killer Shell](https://killer.sh/ckad) - Real exam simulator
+- [KillerCoda](https://killercoda.com/ckad) - Free scenarios
 
 ---
 
