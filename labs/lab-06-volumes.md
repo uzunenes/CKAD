@@ -1,3 +1,9 @@
+---
+layout: default
+title: Lab 06: Volumes & PersistentVolumes
+parent: Labs
+nav_order: 06
+---
 # Lab 06: Volumes & PersistentVolumes
 
 ## 🎯 Learning Objectives

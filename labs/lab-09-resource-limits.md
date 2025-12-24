@@ -1,3 +1,9 @@
+---
+layout: default
+title: Lab 09: Resource Limits & Requests
+parent: Labs
+nav_order: 09
+---
 # Lab 09: Resource Limits & Requests
 
 ## 🎯 Learning Objectives

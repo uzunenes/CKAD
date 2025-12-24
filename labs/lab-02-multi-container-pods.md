@@ -1,3 +1,9 @@
+---
+layout: default
+title: Lab 02: Multi-Container Pods
+parent: Labs
+nav_order: 02
+---
 # Lab 02: Multi-Container Pods
 
 ## 🎯 Learning Objectives

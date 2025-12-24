@@ -1,3 +1,9 @@
+---
+layout: default
+title: Lab 16: Kustomize
+parent: Labs
+nav_order: 16
+---
 # Lab 16: Kustomize
 
 ## 🎯 Learning Objectives

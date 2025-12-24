@@ -1,3 +1,9 @@
+---
+layout: default
+title: Lab 11: Security Context & Service Accounts
+parent: Labs
+nav_order: 11
+---
 # Lab 11: Security Context & Service Accounts
 
 ## 🎯 Learning Objectives

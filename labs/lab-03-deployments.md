@@ -1,3 +1,9 @@
+---
+layout: default
+title: Lab 03: Deployments
+parent: Labs
+nav_order: 03
+---
 # Lab 03: Deployments
 
 ## 🎯 Learning Objectives

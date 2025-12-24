@@ -1,3 +1,9 @@
+---
+layout: default
+title: Lab 14: Helm Basics
+parent: Labs
+nav_order: 14
+---
 # Lab 14: Helm Basics
 
 ## 🎯 Learning Objectives

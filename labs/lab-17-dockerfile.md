@@ -1,3 +1,9 @@
+---
+layout: default
+title: Lab 17: Dockerfile & Container Basics
+parent: Labs
+nav_order: 17
+---
 # Lab 17: Dockerfile & Container Basics
 
 ## 🎯 Learning Objectives
