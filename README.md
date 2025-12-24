@@ -1,9 +1,3 @@
----
-layout: default
-title: Home
-nav_order: 1
----
-
 # 🎯 CKAD Practice Labs
 
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
@@ -20,9 +14,7 @@ Hands-on lab exercises to prepare for the **Certified Kubernetes Application Dev
 
 ## 🆕 New to Kubernetes?
 
-Start with the basics:
-
-[📖 Kubernetes Learning Guide](docs/00-intro.md){: .btn .btn-primary }
+Start with the basics: **[Kubernetes Learning Guide](docs/00-intro.md)**
 
 ---
 
@@ -38,61 +30,40 @@ Start with the basics:
 
 ---
 
-## 🗺️ The Big Picture
-
-```mermaid
-%%{init: {'theme': 'dark'}}%%
-graph TB
-    subgraph "Week 1: Basics"
-        POD[Pod] --> MULTI[Multi-Container]
-        MULTI --> DEP[Deployment]
-        DEP --> SVC[Service]
-    end
-    
-    subgraph "Week 2: Configuration"
-        CM[ConfigMap] --> SEC[Secret]
-        SEC --> VOL[Volume]
-    end
-    
-    subgraph "Week 3: Advanced"
-        JOB[Jobs] --> PROBE[Probes]
-        PROBE --> SECCTX[Security]
-    end
-    
-    subgraph "Week 4: Tools"
-        ING[Ingress] --> HELM[Helm]
-        HELM --> KUS[Kustomize]
-    end
-```
-
----
-
-## 📋 Quick Navigation
+## 📋 Lab List (17 Labs, 100+ Exercises)
 
 ### Week 1: Core Concepts
-- [Lab 01: Pod Basics](labs/lab-01-pod-basics.md)
-- [Lab 02: Multi-Container Pods](labs/lab-02-multi-container-pods.md)
-- [Lab 03: Deployments](labs/lab-03-deployments.md)
-- [Lab 04: Services](labs/lab-04-services.md)
+| # | Lab | Topic |
+|---|-----|-------|
+| 01 | [Pod Basics](labs/lab-01-pod-basics.md) | Pod |
+| 02 | [Multi-Container](labs/lab-02-multi-container-pods.md) | Sidecar, Init |
+| 03 | [Deployments](labs/lab-03-deployments.md) | Scaling, Updates |
+| 04 | [Services](labs/lab-04-services.md) | ClusterIP, NodePort |
 
 ### Week 2: Configuration
-- [Lab 05: ConfigMaps & Secrets](labs/lab-05-configmaps-secrets.md)
-- [Lab 06: Volumes](labs/lab-06-volumes.md)
-- [Lab 09: Resource Limits](labs/lab-09-resource-limits.md)
+| # | Lab | Topic |
+|---|-----|-------|
+| 05 | [ConfigMaps & Secrets](labs/lab-05-configmaps-secrets.md) | Config |
+| 06 | [Volumes](labs/lab-06-volumes.md) | PV/PVC |
+| 09 | [Resource Limits](labs/lab-09-resource-limits.md) | CPU/Memory |
 
 ### Week 3: Advanced
-- [Lab 07: Jobs & CronJobs](labs/lab-07-jobs-cronjobs.md)
-- [Lab 08: Probes](labs/lab-08-probes.md)
-- [Lab 10: Network Policies](labs/lab-10-network-policies.md)
-- [Lab 11: Security](labs/lab-11-security.md)
+| # | Lab | Topic |
+|---|-----|-------|
+| 07 | [Jobs & CronJobs](labs/lab-07-jobs-cronjobs.md) | Batch |
+| 08 | [Probes](labs/lab-08-probes.md) | Health Checks |
+| 10 | [Network Policies](labs/lab-10-network-policies.md) | Firewall |
+| 11 | [Security](labs/lab-11-security.md) | SecurityContext |
 
 ### Week 4: Tools
-- [Lab 12: Ingress](labs/lab-12-ingress.md)
-- [Lab 13: Debugging](labs/lab-13-debugging.md)
-- [Lab 14: Helm](labs/lab-14-helm.md)
-- [Lab 15: Deployment Strategies](labs/lab-15-deployment-strategies.md)
-- [Lab 16: Kustomize](labs/lab-16-kustomize.md)
-- [Lab 17: Dockerfile](labs/lab-17-dockerfile.md)
+| # | Lab | Topic |
+|---|-----|-------|
+| 12 | [Ingress](labs/lab-12-ingress.md) | HTTP Routing |
+| 13 | [Debugging](labs/lab-13-debugging.md) | Troubleshooting |
+| 14 | [Helm](labs/lab-14-helm.md) | Charts |
+| 15 | [Deployment Strategies](labs/lab-15-deployment-strategies.md) | Blue-Green |
+| 16 | [Kustomize](labs/lab-16-kustomize.md) | Overlays |
+| 17 | [Dockerfile](labs/lab-17-dockerfile.md) | Containers |
 
 ---
 
@@ -125,4 +96,4 @@ k expose deploy web --port=80
 
 ⭐ **If this repo helped you, please give it a star!**
 
-[View on GitHub](https://github.com/uzunenes/CKAD){: .btn }
+📝 **Contributing:** Pull requests are welcome!
