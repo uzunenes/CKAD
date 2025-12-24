@@ -1,5 +1,11 @@
 # 🎯 CKAD Pratik Lablar
 
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![K3s](https://img.shields.io/badge/K3s-FFC61C?style=for-the-badge&logo=k3s&logoColor=black)
+![CKAD](https://img.shields.io/badge/CKAD-Exam%20Ready-success?style=for-the-badge)
+![Labs](https://img.shields.io/badge/Labs-17-blue?style=for-the-badge)
+![Exercises](https://img.shields.io/badge/Exercises-100+-orange?style=for-the-badge)
+
 **Certified Kubernetes Application Developer (CKAD)** sınavına hazırlık için uygulamalı laboratuvar çalışmaları.
 
 > 🖥️ Bu lablar **k3s** ortamı için optimize edilmiştir.
@@ -34,6 +40,7 @@ Kubernetes'e yeni misin? Önce felsefeyi anla:
 ## �️ Büyük Resim: Ne Öğreneceksin?
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1f6feb', 'primaryTextColor': '#fff', 'primaryBorderColor': '#388bfd', 'lineColor': '#8b949e', 'secondaryColor': '#21262d', 'tertiaryColor': '#161b22'}}}%%
 graph TB
     subgraph "1️⃣ Temel (Hafta 1)"
         POD[Pod] --> MULTI[Multi-Container]
