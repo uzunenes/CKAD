@@ -1,8 +1,3 @@
----
-layout: default
-title: Kubernetes Learning Guide
-nav_order: 2
----
 
 # Kubernetes Learning Guide
 

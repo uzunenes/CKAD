@@ -1,9 +1,3 @@
----
-layout: default
-title: Lab 04: Services
-parent: Labs
-nav_order: 04
----
 # Lab 04: Services
 
 ## 🎯 Learning Objectives

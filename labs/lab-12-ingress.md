@@ -1,9 +1,3 @@
----
-layout: default
-title: Lab 12: Ingress (K3s Traefik)
-parent: Labs
-nav_order: 12
----
 # Lab 12: Ingress (K3s Traefik)
 
 ## 🎯 Learning Objectives

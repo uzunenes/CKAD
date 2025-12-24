@@ -1,9 +1,3 @@
----
-layout: default
-title: Lab 05: ConfigMaps & Secrets
-parent: Labs
-nav_order: 05
----
 # Lab 05: ConfigMaps & Secrets
 
 ## 🎯 Learning Objectives

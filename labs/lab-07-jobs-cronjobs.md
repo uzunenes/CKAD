@@ -1,9 +1,3 @@
----
-layout: default
-title: Lab 07: Jobs & CronJobs
-parent: Labs
-nav_order: 07
----
 # Lab 07: Jobs & CronJobs
 
 ## 🎯 Learning Objectives

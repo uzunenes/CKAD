@@ -1,9 +1,3 @@
----
-layout: default
-title: Lab 01: Pod Basics
-parent: Labs
-nav_order: 01
----
 # Lab 01: Pod Basics
 
 ## 🎯 Learning Objectives

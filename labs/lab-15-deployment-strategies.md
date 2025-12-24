@@ -1,9 +1,3 @@
----
-layout: default
-title: Lab 15: Blue-Green & Canary Deployments
-parent: Labs
-nav_order: 15
----
 # Lab 15: Blue-Green & Canary Deployments
 
 ## 🎯 Learning Objectives

@@ -1,9 +1,3 @@
----
-layout: default
-title: Lab 10: Network Policies
-parent: Labs
-nav_order: 10
----
 # Lab 10: Network Policies
 
 ## 🎯 Learning Objectives

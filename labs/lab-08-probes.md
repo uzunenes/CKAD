@@ -1,9 +1,3 @@
----
-layout: default
-title: Lab 08: Liveness & Readiness Probes
-parent: Labs
-nav_order: 08
----
 # Lab 08: Liveness & Readiness Probes
 
 ## 🎯 Learning Objectives

@@ -1,9 +1,3 @@
----
-layout: default
-title: Lab 13: Debugging & Troubleshooting
-parent: Labs
-nav_order: 13
----
 # Lab 13: Debugging & Troubleshooting
 
 ## 🎯 Learning Objectives
