@@ -1,80 +1,85 @@
 # Lab 07: Jobs & CronJobs
 
-## 🎯 Öğrenme Hedefleri
-- Job oluşturmak ve yönetmek
-- CronJob oluşturmak
-- Parallelism ve completions
+## 🎯 Learning Objectives
+- Understand Jobs for one-time tasks
+- Understand CronJobs for scheduled tasks
+- Parallelism and completions
+- Cron syntax
 
 ---
 
 ## 📖 Job vs CronJob
 
 ```mermaid
-graph TB
-    subgraph "Job"
-        J[Job] --> P1[Pod ✓]
-        J --> P2[Pod ✓]
-        J --> P3[Pod ✓]
-    end
+%%{init: {'theme': 'dark'}}%%
+graph LR
+    JOB[Job<br/>Run once] --> POD1[Pod]
+    POD1 --> |Completed| DONE[✓ Done]
     
-    subgraph "CronJob"
-        CJ[CronJob<br/>*/5 * * * *] --> |Her 5 dk| J1[Job 1]
-        CJ --> |Her 5 dk| J2[Job 2]
-        CJ --> |Her 5 dk| J3[Job 3]
-    end
+    CRON[CronJob<br/>Schedule] --> |Every X time| JOB2[Job]
+    JOB2 --> POD2[Pod]
 ```
 
-| Kaynak | Açıklama |
-|--------|----------|
-| **Job** | Bir kez çalışıp biten görev |
-| **CronJob** | Zamanlanmış tekrarlayan görev |
+| Resource | Use Case |
+|----------|----------|
+| **Job** | Batch processing, one-time tasks |
+| **CronJob** | Scheduled backups, reports |
 
 ---
 
-## 🔨 Job Alıştırmaları
+## 🔨 Job Exercises
 
-### Alıştırma 1: Basit Job
+### Exercise 1: Simple Job
 
-**Görev:** Pi sayısını hesaplayan job oluştur.
+**Task:** Create a Job that prints "Hello CKAD" and exits.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-kubectl create job pi-job --image=perl:5.34 -- perl -Mbignum=bpi -wle 'print bpi(100)'
+kubectl create job hello-job --image=busybox -- echo "Hello CKAD"
 ```
 
-Kontrol:
+Check:
 ```bash
 kubectl get jobs
 kubectl get pods
-kubectl logs <pod-adı>
+kubectl logs <pod-name>
 ```
 </details>
 
 ---
 
-### Alıştırma 2: Job YAML
-
-**Görev:** 3 kez başarılı tamamlanması gereken job oluştur.
-
-```mermaid
-sequenceDiagram
-    participant J as Job
-    participant P1 as Pod 1
-    participant P2 as Pod 2
-    
-    J->>P1: Başlat
-    J->>P2: Başlat (paralel)
-    P1->>J: Tamamlandı ✓
-    J->>P1: Yeni Pod başlat
-    P2->>J: Tamamlandı ✓
-    P1->>J: Tamamlandı ✓
-    Note over J: completions: 3 ✓
-```
+### Exercise 2: Job YAML
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl", "-Mbignum=bpi", "-wle", "print bpi(100)"]
+      restartPolicy: Never
+  backoffLimit: 4
+```
+</details>
+
+---
+
+### Exercise 3: Job with Completions
+
+**Task:** Create a Job that runs 5 times.
+
+<details>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: batch/v1
@@ -82,107 +87,81 @@ kind: Job
 metadata:
   name: multi-job
 spec:
-  completions: 3       # Toplam kaç başarılı
-  parallelism: 2       # Aynı anda kaç pod
-  backoffLimit: 4      # Max retry
+  completions: 5      # Run 5 times
+  parallelism: 2      # 2 at a time
   template:
     spec:
       containers:
       - name: worker
         image: busybox
-        command: ["sh", "-c", "echo İş $(date) && sleep 5"]
+        command: ["sh", "-c", "echo Processing && sleep 5"]
       restartPolicy: Never
-```
-
-```bash
-kubectl apply -f multi-job.yaml
-kubectl get jobs -w
-kubectl get pods -w
 ```
 </details>
 
 ---
 
-### Alıştırma 3: Başarısız Job
-
-**Görev:** Başarısız olan job'ın davranışını gözlemle.
+### Exercise 4: Job Cleanup
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: fail-job
 spec:
-  backoffLimit: 2  # 2 retry sonra dur
-  template:
-    spec:
-      containers:
-      - name: fail
-        image: busybox
-        command: ["sh", "-c", "exit 1"]  # Hep başarısız
-      restartPolicy: Never
-```
-
-```bash
-kubectl apply -f fail-job.yaml
-kubectl get pods  # Birden fazla pod (retry)
-kubectl describe job fail-job
+  ttlSecondsAfterFinished: 60  # Auto-delete after 60s
 ```
 </details>
 
 ---
 
-### Alıştırma 4: Job Silme
+## 🔨 CronJob Exercises
+
+### Exercise 5: Simple CronJob
+
+**Task:** Create a CronJob that runs every minute.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Job ve pod'larını sil
-kubectl delete job pi-job
-
-# Tüm job'ları sil
-kubectl delete jobs --all
-```
-</details>
-
----
-
-## 🔨 CronJob Alıştırmaları
-
-### Alıştırma 5: CronJob Oluştur
-
-**Görev:** Her dakika çalışan cronjob oluştur.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```bash
-kubectl create cronjob hello-cron --image=busybox --schedule="*/1 * * * *" -- echo "Merhaba $(date)"
+kubectl create cronjob minute-cron --image=busybox --schedule="* * * * *" -- date
 ```
 
-Kontrol:
+Check:
 ```bash
 kubectl get cronjobs
-kubectl get jobs -w  # 1 dk bekle
+kubectl get jobs  # A new job each minute
 ```
 </details>
 
 ---
 
-### Alıştırma 6: CronJob YAML
+### Exercise 6: Cron Syntax
 
-```mermaid
-graph LR
-    CRON[CronJob<br/>0 2 * * *] --> |Her gece 02:00| JOB[Job]
-    JOB --> POD[Pod<br/>Backup işi]
+```
+┌───────────── minute (0 - 59)
+│ ┌───────────── hour (0 - 23)
+│ │ ┌───────────── day of month (1 - 31)
+│ │ │ ┌───────────── month (1 - 12)
+│ │ │ │ ┌───────────── day of week (0 - 6)
+│ │ │ │ │
+* * * * *
 ```
 
+| Schedule | Meaning |
+|----------|---------|
+| `* * * * *` | Every minute |
+| `0 * * * *` | Every hour |
+| `0 0 * * *` | Every day at midnight |
+| `0 0 * * 0` | Every Sunday |
+| `*/5 * * * *` | Every 5 minutes |
+
+---
+
+### Exercise 7: CronJob YAML
+
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: batch/v1
@@ -190,9 +169,7 @@ kind: CronJob
 metadata:
   name: backup-cron
 spec:
-  schedule: "0 2 * * *"  # Her gün 02:00
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 1
+  schedule: "0 2 * * *"  # 2 AM daily
   jobTemplate:
     spec:
       template:
@@ -200,64 +177,61 @@ spec:
           containers:
           - name: backup
             image: busybox
-            command: ["sh", "-c", "echo Backup $(date)"]
+            command: ["sh", "-c", "echo Backup at $(date)"]
           restartPolicy: OnFailure
 ```
 </details>
 
 ---
 
-### Cron Format
+### Exercise 8: Concurrency Policy
 
-```
-┌───────────── dakika (0 - 59)
-│ ┌───────────── saat (0 - 23)
-│ │ ┌───────────── gün (1 - 31)
-│ │ │ ┌───────────── ay (1 - 12)
-│ │ │ │ ┌───────────── haftanın günü (0 - 6)
-│ │ │ │ │
-* * * * *
-```
-
-| Örnek | Açıklama |
-|-------|----------|
-| `*/5 * * * *` | Her 5 dakikada |
-| `0 * * * *` | Her saat başı |
-| `0 0 * * *` | Her gece 00:00 |
-| `0 2 * * 0` | Her Pazar 02:00 |
-
----
-
-## 🎯 Sınav Pratiği
-
-### Senaryo 1
-> `math-job` adında job oluştur: `expr 5 + 3` çalıştırsın.
+| Policy | Behavior |
+|--------|----------|
+| **Allow** | Multiple jobs can run |
+| **Forbid** | Skip if previous running |
+| **Replace** | Replace previous job |
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
-```bash
-kubectl create job math-job --image=busybox -- expr 5 + 3
-kubectl logs job/math-job
+```yaml
+spec:
+  concurrencyPolicy: Forbid
 ```
 </details>
 
 ---
 
-### Senaryo 2
-> Her 10 dakikada çalışan `cleanup` cronjob oluştur.
+## 🎯 Exam Practice
+
+### Scenario 1
+> Create a Job named `count-job` that counts from 1 to 10.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-kubectl create cronjob cleanup --image=busybox --schedule="*/10 * * * *" -- echo "Cleanup done"
+kubectl create job count-job --image=busybox -- sh -c "for i in $(seq 1 10); do echo $i; done"
 ```
 </details>
 
 ---
 
-## 🧹 Temizlik
+### Scenario 2
+> Create a CronJob named `report-cron` that runs every 5 minutes.
+
+<details>
+<summary>✅ Solution</summary>
+
+```bash
+kubectl create cronjob report-cron --image=busybox --schedule="*/5 * * * *" -- echo "Report generated"
+```
+</details>
+
+---
+
+## 🧹 Cleanup
 
 ```bash
 kubectl delete job --all
@@ -266,12 +240,13 @@ kubectl delete cronjob --all
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Job oluşturma
-- [x] completions ve parallelism
-- [x] CronJob oluşturma
-- [x] Cron schedule formatı
+- [x] Create Jobs
+- [x] Completions and parallelism
+- [x] Create CronJobs
+- [x] Cron syntax
+- [x] Concurrency policies
 
 ---
 

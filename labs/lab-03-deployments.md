@@ -1,16 +1,17 @@
 # Lab 03: Deployments
 
-## 🎯 Öğrenme Hedefleri
-- Deployment nedir ve neden kullanılır
-- Deployment oluşturma ve yönetme
-- Rolling Update ve Rollback
-- Scaling (ölçeklendirme)
+## 🎯 Learning Objectives
+- Understand what a Deployment is and why it's used
+- Create and manage Deployments
+- Rolling Update and Rollback
+- Scaling
 
 ---
 
-## 📖 Deployment Nedir?
+## 📖 What is a Deployment?
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
     D[Deployment] --> RS1[ReplicaSet v1]
     D --> RS2[ReplicaSet v2]
@@ -19,32 +20,32 @@ graph TB
     RS2 --> P3[Pod]
     RS2 --> P4[Pod]
     
-    style RS1 fill:#ccc
-    style RS2 fill:#9f9
+    style RS1 fill:#555
+    style RS2 fill:#1f6feb
 ```
 
-Deployment şunları sağlar:
-- ✅ Pod'ların otomatik yeniden oluşturulması
-- ✅ Rolling update (kesintisiz güncelleme)
-- ✅ Rollback (geri alma)
-- ✅ Scaling (ölçeklendirme)
+Deployment provides:
+- ✅ Automatic pod recreation
+- ✅ Rolling updates (zero-downtime)
+- ✅ Rollback capability
+- ✅ Scaling
 
 ---
 
-## 🔨 Pratik Alıştırmalar
+## 🔨 Hands-on Exercises
 
-### Alıştırma 1: Deployment Oluştur
+### Exercise 1: Create Deployment
 
-**Görev:** `nginx` image kullanan `web-deploy` adında 3 replica'lı deployment oluştur.
+**Task:** Create a deployment named `web-deploy` using `nginx` image with 3 replicas.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl create deployment web-deploy --image=nginx --replicas=3
 ```
 
-Kontrol:
+Check:
 ```bash
 kubectl get deployments
 kubectl get replicasets
@@ -54,15 +55,15 @@ kubectl get pods
 
 ---
 
-### Alıştırma 2: Deployment YAML
+### Exercise 2: Deployment YAML
 
-**Görev:** YAML dosyası ile deployment oluştur.
+**Task:** Create a deployment using a YAML file.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Şablon oluştur
+# Generate template
 kubectl create deployment api-deploy --image=nginx:1.20 --replicas=2 --dry-run=client -o yaml > api-deploy.yaml
 ```
 
@@ -93,16 +94,17 @@ kubectl apply -f api-deploy.yaml
 
 ---
 
-### Alıştırma 3: Scaling
+### Exercise 3: Scaling
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph LR
-    subgraph "Önce (replicas: 2)"
+    subgraph "Before (replicas: 2)"
         P1[Pod 1]
         P2[Pod 2]
     end
     
-    subgraph "Sonra (replicas: 5)"
+    subgraph "After (replicas: 5)"
         P3[Pod 1]
         P4[Pod 2]
         P5[Pod 3]
@@ -114,15 +116,15 @@ graph LR
     P2 --> P4
 ```
 
-**Görev:** `web-deploy`'u 5 replica'ya ölçeklendir.
+**Task:** Scale `web-deploy` to 5 replicas.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl scale deployment web-deploy --replicas=5
 
-# Kontrol
+# Check
 kubectl get deployment web-deploy
 kubectl get pods -l app=web-deploy
 ```
@@ -130,91 +132,92 @@ kubectl get pods -l app=web-deploy
 
 ---
 
-### Alıştırma 4: Rolling Update
+### Exercise 4: Rolling Update
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant D as Deployment
     participant RS1 as ReplicaSet v1
     participant RS2 as ReplicaSet v2
     
-    D->>RS2: Yeni pod oluştur
+    D->>RS2: Create new pod
     RS2->>RS2: Pod Ready ✓
-    D->>RS1: Eski pod sil
-    D->>RS2: Yeni pod oluştur
+    D->>RS1: Delete old pod
+    D->>RS2: Create new pod
     RS2->>RS2: Pod Ready ✓
-    D->>RS1: Eski pod sil
-    Note over RS1,RS2: Kesintisiz güncelleme!
+    D->>RS1: Delete old pod
+    Note over RS1,RS2: Zero-downtime update!
 ```
 
-**Görev:** `web-deploy` image'ını `nginx:1.21` olarak güncelle.
+**Task:** Update `web-deploy` image to `nginx:1.21`.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Image güncelle
+# Update image
 kubectl set image deployment/web-deploy nginx=nginx:1.21
 
-# Rollout durumunu izle
+# Watch rollout status
 kubectl rollout status deployment/web-deploy
 ```
 </details>
 
 ---
 
-### Alıştırma 5: Rollout Geçmişi
+### Exercise 5: Rollout History
 
-**Görev:** Deployment'ın güncelleme geçmişini görüntüle.
+**Task:** View deployment update history.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Geçmişi gör
+# View history
 kubectl rollout history deployment/web-deploy
 
-# Belirli revision detayı
+# Specific revision details
 kubectl rollout history deployment/web-deploy --revision=1
 ```
 </details>
 
 ---
 
-### Alıştırma 6: Rollback
+### Exercise 6: Rollback
 
-**Görev:** Deployment'ı önceki versiyona geri al.
+**Task:** Rollback deployment to previous version.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Bir öncekine dön
+# Rollback to previous
 kubectl rollout undo deployment/web-deploy
 
-# Belirli revision'a dön
+# Rollback to specific revision
 kubectl rollout undo deployment/web-deploy --to-revision=1
 
-# Durumu kontrol et
+# Check status
 kubectl rollout status deployment/web-deploy
 ```
 </details>
 
 ---
 
-### Alıştırma 7: Deployment Stratejileri
+### Exercise 7: Deployment Strategies
 
-**RollingUpdate** (varsayılan):
+**RollingUpdate** (default):
 ```yaml
 spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1        # Fazladan kaç pod
-      maxUnavailable: 1  # Kaç pod eksik olabilir
+      maxSurge: 1        # How many extra pods
+      maxUnavailable: 1  # How many pods can be unavailable
 ```
 
-**Recreate** (tümünü sil, yeniden oluştur):
+**Recreate** (delete all, create new):
 ```yaml
 spec:
   strategy:
@@ -223,35 +226,35 @@ spec:
 
 ---
 
-### Alıştırma 8: Pause ve Resume
+### Exercise 8: Pause and Resume
 
-**Görev:** Rollout'u duraklat, birden fazla değişiklik yap, sonra devam et.
+**Task:** Pause rollout, make multiple changes, then resume.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Duraklat
+# Pause
 kubectl rollout pause deployment/web-deploy
 
-# Değişiklikler (rollout başlamaz)
+# Make changes (rollout won't start)
 kubectl set image deployment/web-deploy nginx=nginx:1.22
 kubectl set resources deployment/web-deploy -c nginx --limits=memory=256Mi
 
-# Devam et (tek rollout)
+# Resume (single rollout)
 kubectl rollout resume deployment/web-deploy
 ```
 </details>
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-### Senaryo 1
-> `frontend` adında, `httpd:2.4` image kullanan 4 replica'lı deployment oluştur.
+### Scenario 1
+> Create a deployment named `frontend` using `httpd:2.4` image with 4 replicas.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl create deployment frontend --image=httpd:2.4 --replicas=4
@@ -260,11 +263,11 @@ kubectl create deployment frontend --image=httpd:2.4 --replicas=4
 
 ---
 
-### Senaryo 2
-> `frontend` image'ını `httpd:alpine` olarak güncelle. Sonra revision 1'e geri al.
+### Scenario 2
+> Update `frontend` image to `httpd:alpine`. Then rollback to revision 1.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl set image deployment/frontend httpd=httpd:alpine
@@ -275,11 +278,11 @@ kubectl rollout undo deployment/frontend --to-revision=1
 
 ---
 
-### Senaryo 3
-> `backend` adında redis deployment oluştur (2 replica). Sonra 6 replica'ya ölçeklendir.
+### Scenario 3
+> Create a redis deployment named `backend` with 2 replicas. Then scale to 6 replicas.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl create deployment backend --image=redis --replicas=2
@@ -289,7 +292,7 @@ kubectl scale deployment backend --replicas=6
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 kubectl delete deployment --all
@@ -297,14 +300,14 @@ kubectl delete deployment --all
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Deployment oluşturma
-- [x] ReplicaSet ilişkisi
+- [x] Deployment creation
+- [x] ReplicaSet relationship
 - [x] Scaling
 - [x] Rolling update
 - [x] Rollback
-- [x] Deployment stratejileri
+- [x] Deployment strategies
 
 ---
 

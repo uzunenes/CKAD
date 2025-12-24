@@ -1,16 +1,17 @@
 # Lab 12: Ingress (K3s Traefik)
 
-## 🎯 Öğrenme Hedefleri
-- Ingress nedir anlamak
+## 🎯 Learning Objectives
+- Understand Ingress
 - K3s Traefik Ingress Controller
-- Path-based ve Host-based routing
-- TLS yapılandırması
+- Path-based and Host-based routing
+- TLS configuration
 
 ---
 
-## 📖 Ingress Nedir?
+## 📖 What is Ingress?
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph LR
     CLIENT[Internet] --> ING[Ingress<br/>Traefik]
     ING --> |/api| SVC1[api-svc]
@@ -22,49 +23,30 @@ graph LR
     SVC3 --> P3[Pod]
 ```
 
-| Kavram | Açıklama |
-|--------|----------|
-| **Ingress** | HTTP/HTTPS routing kuralları |
-| **Ingress Controller** | Kuralları uygulayan bileşen (Traefik, Nginx) |
-
-K3s varsayılan olarak **Traefik** Ingress Controller ile gelir!
+K3s comes with **Traefik** Ingress Controller by default!
 
 ---
 
-## 🔨 Hazırlık
+## 🔨 Hands-on Exercises
 
-### K3s Traefik Kontrol
-
-```bash
-# Traefik pod'larını kontrol et
-kubectl get pods -n kube-system | grep traefik
-
-# Traefik service
-kubectl get svc -n kube-system | grep traefik
-```
-
-### Test Uygulamaları Oluştur
+### Setup: Create Test Apps
 
 ```bash
-# App 1
 kubectl create deployment app1 --image=nginx --port=80
 kubectl expose deployment app1 --port=80
 
-# App 2
 kubectl create deployment app2 --image=httpd --port=80
 kubectl expose deployment app2 --port=80
 ```
 
 ---
 
-## 🔨 Pratik Alıştırmalar
+### Exercise 1: Simple Ingress
 
-### Alıştırma 1: Basit Ingress
-
-**Görev:** Path-based routing yapan Ingress oluştur.
+**Task:** Create path-based routing.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -90,38 +72,14 @@ spec:
             port:
               number: 80
 ```
-
-```bash
-kubectl apply -f simple-ingress.yaml
-kubectl get ingress
-```
-
-Test:
-```bash
-# Node IP'sini bul
-kubectl get nodes -o wide
-
-# Test et
-curl http://<NODE_IP>/app1
-curl http://<NODE_IP>/app2
-```
 </details>
 
 ---
 
-### Alıştırma 2: Host-Based Routing
-
-```mermaid
-graph LR
-    C[Client] --> ING[Ingress]
-    ING --> |app1.local| S1[app1-svc]
-    ING --> |app2.local| S2[app2-svc]
-```
-
-**Görev:** Farklı hostname'lere göre yönlendirme yap.
+### Exercise 2: Host-Based Routing
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -154,59 +112,25 @@ spec:
 
 Test:
 ```bash
-# /etc/hosts'a ekle (veya curl --header kullan)
 curl -H "Host: app1.local" http://<NODE_IP>
-curl -H "Host: app2.local" http://<NODE_IP>
 ```
 </details>
 
 ---
 
-### Alıştırma 3: pathType Farkları
+### Exercise 3: pathType Options
 
-| pathType | Açıklama | Örnek |
-|----------|----------|-------|
-| `Prefix` | Prefix match | `/api` → `/api`, `/api/v1` |
-| `Exact` | Tam eşleşme | `/api` → sadece `/api` |
-| `ImplementationSpecific` | Controller'a bağlı | - |
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: pathtype-ingress
-spec:
-  rules:
-  - http:
-      paths:
-      - path: /exact
-        pathType: Exact
-        backend:
-          service:
-            name: app1
-            port:
-              number: 80
-      - path: /prefix
-        pathType: Prefix
-        backend:
-          service:
-            name: app2
-            port:
-              number: 80
-```
-</details>
+| pathType | Description |
+|----------|-------------|
+| `Prefix` | Prefix match: `/api` → `/api`, `/api/v1` |
+| `Exact` | Exact match: `/api` → only `/api` |
 
 ---
 
-### Alıştırma 4: Default Backend
-
-**Görev:** Eşleşmeyen istekler için default backend ayarla.
+### Exercise 4: Default Backend
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -234,49 +158,13 @@ spec:
 
 ---
 
-### Alıştırma 5: Ingress Annotations
-
-K3s Traefik için bazı faydalı annotation'lar:
+### Exercise 5: TLS Ingress
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: annotated-ingress
-  annotations:
-    # URL rewrite
-    traefik.ingress.kubernetes.io/rewrite-target: /
-    # Rate limiting
-    traefik.ingress.kubernetes.io/rate-limit: "100"
-spec:
-  rules:
-  - http:
-      paths:
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: app1
-            port:
-              number: 80
-```
-</details>
-
----
-
-### Alıştırma 6: TLS Ingress
-
-**Görev:** HTTPS için TLS secret oluştur ve Ingress'e ekle.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-TLS secret oluştur:
+Create TLS secret:
 ```bash
-# Self-signed certificate (test için)
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout tls.key -out tls.crt -subj "/CN=myapp.local"
 
@@ -310,13 +198,13 @@ spec:
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-### Senaryo 1 ⭐
-> `webapp` deployment ve service zaten var. `/web` path'i için Ingress oluştur.
+### Scenario 1
+> Create Ingress for path `/web` routing to `webapp` service on port 80.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -339,35 +227,7 @@ spec:
 
 ---
 
-### Senaryo 2 ⭐
-> `api.example.com` host'u için Ingress oluştur. Backend: `api-svc` port 8080.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: api-ingress
-spec:
-  rules:
-  - host: api.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: api-svc
-            port:
-              number: 8080
-```
-</details>
-
----
-
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 kubectl delete ingress --all
@@ -379,14 +239,13 @@ rm -f tls.key tls.crt
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Ingress resource oluşturma
+- [x] Ingress resource creation
 - [x] Path-based routing
 - [x] Host-based routing
 - [x] pathType (Prefix, Exact)
-- [x] K3s Traefik Ingress Controller
-- [x] TLS yapılandırması
+- [x] TLS configuration
 
 ---
 

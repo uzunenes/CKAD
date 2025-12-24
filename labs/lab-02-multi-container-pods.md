@@ -1,56 +1,57 @@
 # Lab 02: Multi-Container Pods
 
-## 🎯 Öğrenme Hedefleri
-- Multi-container pod kalıplarını anlamak
-- Sidecar pattern uygulamak
-- Init container kullanmak
-- Container'lar arası iletişim
+## 🎯 Learning Objectives
+- Understand multi-container pod patterns
+- Implement Sidecar pattern
+- Use Init Containers
+- Communication between containers
 
 ---
 
 ## 📖 Multi-Container Patterns
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
     subgraph "Sidecar Pattern"
         direction LR
-        A1[Ana Container<br/>Web App] --> A2[Sidecar<br/>Log Collector]
+        A1[Main Container<br/>Web App] --> A2[Sidecar<br/>Log Collector]
         A1 --> V1[(Shared Volume)]
         A2 --> V1
     end
     
     subgraph "Ambassador Pattern"
         direction LR
-        B1[Ana Container] --> B2[Ambassador<br/>Proxy]
-        B2 --> EXT[Dış Servis]
+        B1[Main Container] --> B2[Ambassador<br/>Proxy]
+        B2 --> EXT[External Service]
     end
     
     subgraph "Adapter Pattern"
         direction LR
-        C1[Ana Container] --> C2[Adapter<br/>Formatter]
+        C1[Main Container] --> C2[Adapter<br/>Formatter]
         C2 --> MON[Monitoring]
     end
 ```
 
-| Pattern | Kullanım |
+| Pattern | Use Case |
 |---------|----------|
-| **Sidecar** | Log toplama, sync, proxy |
-| **Ambassador** | Dış servislere bağlantı |
-| **Adapter** | Veri format dönüşümü |
+| **Sidecar** | Log collection, sync, proxy |
+| **Ambassador** | Connection to external services |
+| **Adapter** | Data format conversion |
 
 ---
 
-## 🔨 Pratik Alıştırmalar
+## 🔨 Hands-on Exercises
 
-### Alıştırma 1: İki Container'lı Pod
+### Exercise 1: Two-Container Pod
 
-**Görev:** Aşağıdaki özelliklere sahip bir pod oluştur:
-- Pod adı: `two-containers`
-- Container 1: `nginx` (isim: web)
-- Container 2: `busybox` (isim: sidecar), `sleep 3600`
+**Task:** Create a pod with these specs:
+- Pod name: `two-containers`
+- Container 1: `nginx` (name: web)
+- Container 2: `busybox` (name: sidecar), runs `sleep 3600`
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -76,18 +77,18 @@ kubectl get pods two-containers
 
 ---
 
-### Alıştırma 2: Belirli Container'a Erişim
+### Exercise 2: Access Specific Container
 
-**Görev:** `two-containers` pod'undaki `sidecar` container'ına bağlan.
+**Task:** Connect to the `sidecar` container in `two-containers` pod.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Belirli container'a exec
+# Exec into specific container
 kubectl exec -it two-containers -c sidecar -- /bin/sh
 
-# Belirli container logu
+# Logs from specific container
 kubectl logs two-containers -c web
 kubectl logs two-containers -c sidecar
 ```
@@ -95,11 +96,12 @@ kubectl logs two-containers -c sidecar
 
 ---
 
-### Alıştırma 3: Shared Volume ile Sidecar
+### Exercise 3: Sidecar with Shared Volume
 
-**Görev:** Ana container log yazar, sidecar okur.
+**Task:** Main container writes logs, sidecar reads them.
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph LR
     subgraph "Pod: sidecar-pod"
         WEB[nginx<br/>/var/log/nginx] --> VOL[(emptyDir<br/>logs)]
@@ -108,7 +110,7 @@ graph LR
 ```
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -134,39 +136,30 @@ spec:
   - name: logs
     emptyDir: {}
 ```
-
-```bash
-kubectl apply -f sidecar-pod.yaml
-
-# Web container'a trafik gönder
-kubectl exec sidecar-pod -c web -- curl -s localhost
-
-# Log reader'ı kontrol et
-kubectl logs sidecar-pod -c log-reader
-```
 </details>
 
 ---
 
-### Alıştırma 4: Init Container
+### Exercise 4: Init Container
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant K as Kubernetes
     participant I as Init Container
     participant M as Main Container
     
-    K->>I: Başlat
-    I->>I: İş yap (download, config)
-    I->>K: Tamamlandı ✓
-    K->>M: Başlat
-    M->>M: Çalış...
+    K->>I: Start
+    I->>I: Do work (download, config)
+    I->>K: Completed ✓
+    K->>M: Start
+    M->>M: Running...
 ```
 
-**Görev:** Ana container başlamadan önce bir dosya hazırlayan init container ekle.
+**Task:** Add an init container that prepares a file before main container starts.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -177,7 +170,7 @@ spec:
   initContainers:
   - name: init-download
     image: busybox
-    command: ['sh', '-c', 'echo "Hazırlandı: $(date)" > /work/status.txt']
+    command: ['sh', '-c', 'echo "Ready: $(date)" > /work/status.txt']
     volumeMounts:
     - name: workdir
       mountPath: /work
@@ -194,26 +187,16 @@ spec:
   - name: workdir
     emptyDir: {}
 ```
-
-```bash
-kubectl apply -f init-pod.yaml
-
-# İzle
-kubectl get pod init-pod -w
-
-# Sonucu gör
-kubectl logs init-pod
-```
 </details>
 
 ---
 
-### Alıştırma 5: Birden Fazla Init Container
+### Exercise 5: Multiple Init Containers
 
-**Görev:** Sırayla çalışan iki init container oluştur.
+**Task:** Create two init containers that run sequentially.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -235,17 +218,17 @@ spec:
     image: nginx
 ```
 
-Init container'lar sırayla çalışır. Biri bitmeden diğeri başlamaz.
+Init containers run sequentially. One must finish before the next starts.
 </details>
 
 ---
 
-### Alıştırma 6: Container'lar Arası Network
+### Exercise 6: Inter-Container Networking
 
-**Görev:** Aynı pod içinde container'ların localhost üzerinden iletişimini test et.
+**Task:** Test that containers in the same pod can communicate via localhost.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -264,24 +247,24 @@ spec:
 ```bash
 kubectl apply -f network-test.yaml
 
-# Tester'dan web'e eriş (localhost)
+# Access web from tester (localhost)
 kubectl exec network-test -c tester -- curl -s localhost:80
 ```
 
-Aynı pod içindeki container'lar `localhost` üzerinden haberleşir!
+Containers in the same pod communicate via `localhost`!
 </details>
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-### Senaryo 1
-> `log-app` adında pod oluştur:
-> - Container 1: `nginx` (isim: app)
-> - Container 2: `busybox` (isim: logger), `sleep 3600` çalıştırsın
+### Scenario 1
+> Create a pod named `log-app`:
+> - Container 1: `nginx` (name: app)
+> - Container 2: `busybox` (name: logger), runs `sleep 3600`
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -300,11 +283,11 @@ spec:
 
 ---
 
-### Senaryo 2
-> Init container'lı bir pod oluştur. Init container `wget -O /data/index.html http://info.cern.ch` çalıştırsın. Ana container nginx olsun ve bu dosyayı sunsun.
+### Scenario 2
+> Create a pod with init container. Init container runs `wget -O /data/index.html http://info.cern.ch`. Main container is nginx and serves this file.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -335,7 +318,7 @@ spec:
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 kubectl delete pod two-containers sidecar-pod init-pod multi-init-pod network-test --ignore-not-found
@@ -343,14 +326,14 @@ kubectl delete pod two-containers sidecar-pod init-pod multi-init-pod network-te
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Multi-container pod oluşturma
+- [x] Multi-container pod creation
 - [x] Sidecar pattern
 - [x] Init containers
-- [x] Volume ile container'lar arası veri paylaşımı
-- [x] `-c` flag ile container seçimi
-- [x] Container'lar arası localhost iletişimi
+- [x] Shared volumes between containers
+- [x] `-c` flag for container selection
+- [x] Localhost communication between containers
 
 ---
 

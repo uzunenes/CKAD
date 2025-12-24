@@ -1,16 +1,17 @@
 # Lab 17: Dockerfile & Container Basics
 
-## 🎯 Öğrenme Hedefleri
-- Dockerfile yazmak
-- Container image build etmek
+## 🎯 Learning Objectives
+- Write Dockerfiles
+- Build container images
 - Multi-stage builds
-- Image güvenlik best practices
+- Security best practices
 
 ---
 
-## 📖 Container Yapısı
+## 📖 Container Structure
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
     subgraph "Dockerfile"
         FROM[FROM base-image]
@@ -27,24 +28,22 @@ graph TB
 
 ---
 
-## 🔨 Pratik Alıştırmalar
+## 🔨 Hands-on Exercises
 
-### Alıştırma 1: Basit Dockerfile
-
-**Görev:** Nginx tabanlı static web site Dockerfile'ı yaz.
+### Exercise 1: Simple Dockerfile
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-mkdir -p docker-demo && cd docker-demo
+mkdir docker-demo && cd docker-demo
 
 # index.html
 cat <<EOF > index.html
 <!DOCTYPE html>
 <html>
 <head><title>CKAD App</title></head>
-<body><h1>Merhaba CKAD!</h1></body>
+<body><h1>Hello CKAD!</h1></body>
 </html>
 EOF
 
@@ -60,74 +59,30 @@ EOF
 
 ---
 
-### Alıştırma 2: Build ve Run (Docker)
+### Exercise 2: Dockerfile Directives
 
-<details>
-<summary>✅ Çözüm</summary>
-
-```bash
-# Build
-docker build -t myapp:v1 .
-
-# Run
-docker run -d -p 8080:80 myapp:v1
-
-# Test
-curl localhost:8080
-
-# Stop
-docker stop $(docker ps -q --filter ancestor=myapp:v1)
-```
-
-⚠️ K3s'te containerd kullanılır, docker komutu olmayabilir.
-</details>
-
----
-
-### Alıştırma 3: Dockerfile Direktifleri
-
-| Direktif | Açıklama |
-|----------|----------|
+| Directive | Description |
+|-----------|-------------|
 | `FROM` | Base image |
-| `WORKDIR` | Çalışma dizini |
-| `COPY` | Dosya kopyala |
-| `ADD` | Dosya kopyala (tar extract, URL) |
-| `RUN` | Build-time komut |
-| `CMD` | Default komut |
-| `ENTRYPOINT` | Sabit komut |
+| `WORKDIR` | Working directory |
+| `COPY` | Copy files |
+| `ADD` | Copy files (tar extract, URL) |
+| `RUN` | Build-time command |
+| `CMD` | Default command |
+| `ENTRYPOINT` | Fixed command |
 | `ENV` | Environment variable |
-| `EXPOSE` | Port dokümantasyonu |
-| `USER` | Çalışacak kullanıcı |
-| `ARG` | Build argümanı |
+| `EXPOSE` | Port documentation |
+| `USER` | Run as user |
+| `ARG` | Build argument |
 
 ---
 
-### Alıştırma 4: Python App Dockerfile
+### Exercise 3: Python App Dockerfile
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
-```bash
-# app.py
-cat <<EOF > app.py
-from flask import Flask
-app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    return "Hello CKAD!"
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-EOF
-
-# requirements.txt
-cat <<EOF > requirements.txt
-flask==2.0.1
-EOF
-
-# Dockerfile
-cat <<EOF > Dockerfile.python
+```dockerfile
 FROM python:3.9-slim
 
 WORKDIR /app
@@ -142,31 +97,30 @@ EXPOSE 5000
 USER 1000
 
 CMD ["python", "app.py"]
-EOF
 ```
 </details>
 
 ---
 
-### Alıştırma 5: Multi-Stage Build
-
-**Görev:** Build ve runtime'ı ayır (küçük image).
+### Exercise 4: Multi-Stage Build
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph LR
     S1[Stage 1: Build<br/>golang:1.19] --> |copy binary| S2[Stage 2: Runtime<br/>alpine]
 ```
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```dockerfile
-# Go örneği
+# Build stage
 FROM golang:1.19 AS builder
 WORKDIR /app
 COPY main.go .
 RUN CGO_ENABLED=0 go build -o myapp main.go
 
+# Runtime stage
 FROM alpine:3.18
 WORKDIR /app
 COPY --from=builder /app/myapp .
@@ -174,21 +128,21 @@ USER 1000
 CMD ["./myapp"]
 ```
 
-Multi-stage avantajları:
-- Küçük final image
-- Build tools runtime'da yok
-- Güvenlik artışı
+Multi-stage benefits:
+- Smaller final image
+- Build tools not in runtime
+- Better security
 </details>
 
 ---
 
-### Alıştırma 6: Security Best Practices
+### Exercise 5: Security Best Practices
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```dockerfile
-# ✅ İyi Dockerfile
+# ✅ Good Dockerfile
 FROM python:3.9-slim
 
 # Non-root user
@@ -196,7 +150,7 @@ RUN useradd -r -u 1000 appuser
 
 WORKDIR /app
 
-# Sadece gerekli dosyalar
+# Only necessary files
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -210,45 +164,20 @@ CMD ["python", "app.py"]
 ```
 
 Best practices:
-- ✅ Non-root user kullan
+- ✅ Use non-root user
 - ✅ Minimal base image (alpine, slim)
-- ✅ `--no-cache` ile pip/apt
-- ✅ Specific version tag (`:3.9-slim`)
-- ❌ `latest` tag kullanma
-- ❌ Root olarak çalıştırma
+- ✅ `--no-cache` with pip/apt
+- ✅ Specific version tags
+- ❌ Don't use `latest` tag
+- ❌ Don't run as root
 </details>
 
 ---
 
-### Alıştırma 7: K3s'te Kullanım (containerd)
-
-K3s containerd kullanır. Image'ları import etmek için:
+### Exercise 6: .dockerignore
 
 <details>
-<summary>✅ Çözüm</summary>
-
-```bash
-# Docker ile build, tar olarak export
-docker build -t myapp:v1 .
-docker save myapp:v1 -o myapp.tar
-
-# K3s'e import
-sudo k3s ctr images import myapp.tar
-
-# Kontrol
-sudo k3s ctr images list | grep myapp
-
-# Pod'da kullan
-kubectl run myapp --image=myapp:v1 --image-pull-policy=Never
-```
-</details>
-
----
-
-### Alıştırma 8: .dockerignore
-
-<details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 cat <<EOF > .dockerignore
@@ -262,16 +191,36 @@ __pycache__
 node_modules
 EOF
 ```
-
-Build context'i küçültür, hassas dosyaları hariç tutar.
 </details>
 
 ---
 
-## 🎯 Sınav Pratiği
+### Exercise 7: K3s Usage (containerd)
 
-### Senaryo 1 ⭐
-> Aşağıdaki Dockerfile'daki hataları düzelt:
+K3s uses containerd. To import images:
+
+<details>
+<summary>✅ Solution</summary>
+
+```bash
+# Build with Docker, export as tar
+docker build -t myapp:v1 .
+docker save myapp:v1 -o myapp.tar
+
+# Import to K3s
+sudo k3s ctr images import myapp.tar
+
+# Use in pod
+kubectl run myapp --image=myapp:v1 --image-pull-policy=Never
+```
+</details>
+
+---
+
+## 🎯 Exam Practice
+
+### Scenario 1
+> Fix this Dockerfile:
 ```dockerfile
 FROM ubuntu:latest
 COPY . .
@@ -280,7 +229,7 @@ CMD python3 app.py
 ```
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```dockerfile
 FROM python:3.9-slim
@@ -292,17 +241,17 @@ USER 1000
 CMD ["python3", "app.py"]
 ```
 
-Hatalar:
-- `ubuntu:latest` → specific version + slim
-- `apt-get update` eksik
-- `WORKDIR` eksik
-- Non-root user eksik
-- `CMD` exec form kullan
+Issues fixed:
+- `ubuntu:latest` → specific slim image
+- Missing `apt-get update`
+- Missing `WORKDIR`
+- Missing non-root user
+- `CMD` should use exec form
 </details>
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 cd .. && rm -rf docker-demo
@@ -310,14 +259,14 @@ cd .. && rm -rf docker-demo
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Dockerfile direktifleri
+- [x] Dockerfile directives
 - [x] Multi-stage builds
 - [x] Security best practices
-- [x] K3s containerd entegrasyonu
+- [x] K3s containerd integration
 - [x] .dockerignore
 
 ---
 
-[⬅️ Lab 16](lab-16-kustomize.md) | [🏠 Ana Sayfa](../README.md)
+[⬅️ Lab 16](lab-16-kustomize.md) | [🏠 Home](../README.md)

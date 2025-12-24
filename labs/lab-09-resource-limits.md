@@ -1,57 +1,38 @@
 # Lab 09: Resource Limits & Requests
 
-## 🎯 Öğrenme Hedefleri
-- Resource requests ve limits anlamak
-- CPU ve Memory ayarları
-- LimitRange ve ResourceQuota
+## 🎯 Learning Objectives
+- Understand CPU and Memory requests/limits
+- Configure resource constraints
+- LimitRange and ResourceQuota
 
 ---
 
 ## 📖 Requests vs Limits
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph LR
     subgraph "Pod Resources"
-        REQ[Requests<br/>Minimum garanti<br/>Scheduling için]
-        LIM[Limits<br/>Maximum kullanım<br/>Aşarsa throttle/kill]
+        REQ[Request<br/>Guaranteed minimum] --> SCH[Scheduler uses this]
+        LIM[Limit<br/>Maximum allowed] --> ENF[Enforced at runtime]
     end
     
-    REQ --> |CPU: 100m| POD[Pod]
-    LIM --> |CPU: 500m| POD
-    REQ --> |Mem: 64Mi| POD
-    LIM --> |Mem: 256Mi| POD
+    OOM[Over Limit] --> KILL[OOMKilled]
 ```
 
-| Kavram | Açıklama | Aşılırsa |
-|--------|----------|----------|
-| **Requests** | Minimum garanti | - |
-| **Limits (CPU)** | Max CPU | Throttle |
-| **Limits (Memory)** | Max RAM | OOMKilled |
+| Concept | Description |
+|---------|-------------|
+| **Request** | Minimum guaranteed resources |
+| **Limit** | Maximum allowed resources |
 
 ---
 
-## 📖 Birimler
+## 🔨 Hands-on Exercises
 
-**CPU:**
-- `1` = 1 CPU core
-- `500m` = 0.5 CPU (500 millicores)
-- `100m` = 0.1 CPU
-
-**Memory:**
-- `1Gi` = 1 Gibibyte
-- `512Mi` = 512 Mebibyte
-- `128Mi` = 128 Mebibyte
-
----
-
-## 🔨 Pratik Alıştırmalar
-
-### Alıştırma 1: Basic Resources
-
-**Görev:** CPU ve memory limitleri olan pod oluştur.
+### Exercise 1: Set Resource Requests and Limits
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -65,63 +46,41 @@ spec:
     resources:
       requests:
         memory: "64Mi"
-        cpu: "100m"
+        cpu: "250m"      # 0.25 CPU
       limits:
         memory: "128Mi"
-        cpu: "200m"
-```
-
-```bash
-kubectl apply -f resource-pod.yaml
-kubectl describe pod resource-pod | grep -A5 Limits
+        cpu: "500m"      # 0.5 CPU
 ```
 </details>
 
 ---
 
-### Alıştırma 2: Memory Limit Test
+### Exercise 2: CPU Units
 
-**Görev:** Memory limitini aşan pod gözlemle.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: mem-stress
-spec:
-  containers:
-  - name: stress
-    image: polinux/stress
-    resources:
-      limits:
-        memory: "50Mi"
-    command: ["stress"]
-    args: ["--vm", "1", "--vm-bytes", "100M", "--vm-hang", "1"]
-```
-
-```bash
-kubectl apply -f mem-stress.yaml
-kubectl get pod mem-stress -w  # OOMKilled olacak
-```
-</details>
+| Value | Meaning |
+|-------|---------|
+| `1` | 1 full CPU |
+| `500m` | 0.5 CPU (500 millicores) |
+| `100m` | 0.1 CPU |
 
 ---
 
-### Alıştırma 3: LimitRange
+### Exercise 3: Memory Units
 
-**Görev:** Namespace için default resource limitleri belirle.
+| Value | Meaning |
+|-------|---------|
+| `128Mi` | 128 Mebibytes |
+| `1Gi` | 1 Gibibyte |
+| `500M` | 500 Megabytes |
 
-```mermaid
-graph TB
-    LR[LimitRange] --> |default| POD1[Pod 1<br/>limits: 256Mi]
-    LR --> |default| POD2[Pod 2<br/>limits: 256Mi]
-```
+---
+
+### Exercise 4: LimitRange
+
+**Task:** Set default limits for a namespace.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -130,40 +89,36 @@ metadata:
   name: default-limits
 spec:
   limits:
-  - default:
-      memory: "256Mi"
+  - default:          # Default limits
       cpu: "500m"
-    defaultRequest:
-      memory: "128Mi"
+      memory: "256Mi"
+    defaultRequest:   # Default requests
       cpu: "100m"
+      memory: "64Mi"
+    max:              # Maximum allowed
+      cpu: "1"
+      memory: "1Gi"
+    min:              # Minimum allowed
+      cpu: "50m"
+      memory: "32Mi"
     type: Container
-```
-
-```bash
-kubectl apply -f default-limits.yaml
-
-# Yeni pod oluştur (resources belirtmeden)
-kubectl run test --image=nginx
-
-# Default değerleri gör
-kubectl describe pod test | grep -A5 Limits
 ```
 </details>
 
 ---
 
-### Alıştırma 4: ResourceQuota
+### Exercise 5: ResourceQuota
 
-**Görev:** Namespace için toplam resource kotası belirle.
+**Task:** Limit total resources in a namespace.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: compute-quota
+  name: ns-quota
 spec:
   hard:
     requests.cpu: "2"
@@ -174,94 +129,94 @@ spec:
 ```
 
 ```bash
-kubectl apply -f compute-quota.yaml
-kubectl describe quota compute-quota
+kubectl apply -f quota.yaml
+kubectl describe quota ns-quota
 ```
 </details>
 
 ---
 
-### Alıştırma 5: Kota Durumunu Kontrol
+### Exercise 6: View Resource Usage
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Mevcut kullanımı gör
-kubectl describe quota compute-quota
+# Pod resources
+kubectl top pods
 
-# veya
-kubectl get quota compute-quota -o yaml
+# Node resources
+kubectl top nodes
+
+# Describe pod for limits
+kubectl describe pod <pod-name> | grep -A5 "Limits"
 ```
 </details>
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-### Senaryo 1
-> `stress-pod` oluştur. CPU request: 100m, limit: 200m. Memory request: 64Mi, limit: 128Mi.
+### Scenario 1
+> Create a pod with 100m CPU request and 200m CPU limit.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: stress-pod
+  name: cpu-pod
 spec:
   containers:
-  - name: nginx
+  - name: app
     image: nginx
     resources:
       requests:
         cpu: "100m"
-        memory: "64Mi"
       limits:
         cpu: "200m"
-        memory: "128Mi"
 ```
 </details>
 
 ---
 
-### Senaryo 2
-> Mevcut `resource-pod` un CPU limit'ini `300m` olarak güncelle.
+### Scenario 2
+> Create ResourceQuota limiting namespace to 5 pods.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
-```bash
-kubectl edit pod resource-pod
-# resources.limits.cpu değiştir
-
-# veya yeniden oluştur (pod resources değiştirilemez)
-kubectl delete pod resource-pod
-# YAML'ı düzenle ve apply
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: pod-quota
+spec:
+  hard:
+    pods: "5"
 ```
-
-Not: Pod resources update edilemez, yeniden oluşturulmalı!
 </details>
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
-kubectl delete pod --all
-kubectl delete limitrange --all
-kubectl delete resourcequota --all
+kubectl delete pod resource-pod cpu-pod --ignore-not-found
+kubectl delete limitrange default-limits --ignore-not-found
+kubectl delete quota ns-quota pod-quota --ignore-not-found
 ```
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Requests vs Limits farkı
-- [x] CPU/Memory birimleri
-- [x] LimitRange
-- [x] ResourceQuota
+- [x] CPU and Memory units
+- [x] Requests vs Limits
+- [x] LimitRange for defaults
+- [x] ResourceQuota for namespace limits
 
 ---
 

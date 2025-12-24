@@ -1,133 +1,74 @@
 # Lab 10: Network Policies
 
-## 🎯 Öğrenme Hedefleri
-- NetworkPolicy nedir anlamak
-- Ingress ve Egress kuralları
-- Pod izolasyonu
-- K3s'te NetworkPolicy
+## 🎯 Learning Objectives
+- Understand NetworkPolicy
+- Ingress and Egress rules
+- Allow/Deny traffic between pods
 
 ---
 
-## 📖 NetworkPolicy Nedir?
+## 📖 What is NetworkPolicy?
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
     subgraph "Namespace"
-        FE[Frontend<br/>app=frontend]
+        FE[Frontend<br/>app=frontend] 
         BE[Backend<br/>app=backend]
-        DB[(Database<br/>app=db)]
+        DB[Database<br/>app=db]
     end
     
-    FE --> |✅ Allowed| BE
-    BE --> |✅ Allowed| DB
-    FE -.-> |❌ Denied| DB
-    
-    INTERNET[Internet] -.-> |❌ Denied| DB
+    FE -->|Allowed| BE
+    BE -->|Allowed| DB
+    FE -.->|Blocked| DB
 ```
 
-**NetworkPolicy**, pod'lar arası ağ trafiğini kontrol eden firewall kurallarıdır.
+| Concept | Description |
+|---------|-------------|
+| **NetworkPolicy** | Firewall rules for pods |
+| **Ingress** | Incoming traffic rules |
+| **Egress** | Outgoing traffic rules |
 
-- **Ingress**: Gelen trafik
-- **Egress**: Giden trafik
+> ⚠️ **K3s Note:** Default Flannel CNI has limited NetworkPolicy support. Consider Calico for full support.
 
 ---
 
-## 📖 K3s NetworkPolicy
+## 🔨 Hands-on Exercises
 
-K3s varsayılan olarak **Flannel CNI** kullanır. NetworkPolicy için:
+### Exercise 1: Default Deny All
 
-```bash
-# K3s NetworkPolicy desteğini kontrol et
-kubectl get pods -n kube-system | grep network
-```
-
-> ⚠️ Flannel varsayılanda NetworkPolicy desteklemez. K3s kurulumunda `--flannel-backend=none` ile Calico/Cilium kullanılabilir.
-
----
-
-## 🔨 Pratik Alıştırmalar
-
-### Hazırlık: Test Ortamı
-
-```bash
-# Frontend pod
-kubectl run frontend --image=nginx --labels=app=frontend --port=80
-
-# Backend pod  
-kubectl run backend --image=nginx --labels=app=backend --port=80
-
-# Database pod
-kubectl run db --image=redis --labels=app=db
-
-# Service'ler
-kubectl expose pod frontend --port=80
-kubectl expose pod backend --port=80
-kubectl expose pod db --port=6379
-```
-
-Test (policy olmadan):
-```bash
-# Frontend'den backend'e
-kubectl exec frontend -- curl -s --max-time 2 backend
-
-# Frontend'den db'ye
-kubectl exec frontend -- nc -zv db 6379
-```
-
----
-
-### Alıştırma 1: Default Deny All
-
-**Görev:** Tüm ingress trafiğini engelle.
-
-```mermaid
-graph LR
-    A[Tüm Podlar] -.-> |❌ Denied| B[Hedef Podlar]
-```
+**Task:** Block all traffic to pods.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-ingress
+  name: default-deny-all
 spec:
-  podSelector: {}  # Tüm pod'lara uygulanır
+  podSelector: {}    # Apply to all pods
   policyTypes:
   - Ingress
-```
-
-```bash
-kubectl apply -f default-deny.yaml
-
-# Test - artık erişilemez
-kubectl exec frontend -- curl -s --max-time 2 backend
-# Timeout!
+  - Egress
 ```
 </details>
 
 ---
 
-### Alıştırma 2: Belirli Pod'dan İzin Ver
+### Exercise 2: Allow Specific Pod
 
-**Görev:** Sadece frontend'den backend'e erişime izin ver.
-
-```mermaid
-graph LR
-    FE[Frontend<br/>app=frontend] --> |✅ Port 80| BE[Backend]
-    OTHER[Diğer Podlar] -.-> |❌| BE
-```
+**Task:** Allow traffic from frontend to backend.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-frontend-to-backend
+  name: backend-allow-frontend
 spec:
   podSelector:
     matchLabels:
@@ -143,127 +84,110 @@ spec:
     - protocol: TCP
       port: 80
 ```
-
-```bash
-kubectl apply -f allow-frontend.yaml
-
-# Frontend'den erişim var
-kubectl exec frontend -- curl -s --max-time 2 backend
-
-# Başka pod'dan yok
-kubectl exec db -- curl -s --max-time 2 backend
-```
 </details>
 
 ---
 
-### Alıştırma 3: Egress Kuralı
+### Exercise 3: Allow Namespace
 
-**Görev:** Backend sadece db'ye çıkabilsin.
-
-```mermaid
-graph LR
-    BE[Backend] --> |✅ 6379| DB[Database]
-    BE -.-> |❌| OTHER[Diğer]
-```
+**Task:** Allow traffic from specific namespace.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: backend-egress
+  name: allow-namespace
 spec:
   podSelector:
     matchLabels:
-      app: backend
+      app: api
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: production
+```
+</details>
+
+---
+
+### Exercise 4: Allow DNS (Egress)
+
+**Task:** Allow DNS resolution.
+
+<details>
+<summary>✅ Solution</summary>
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+spec:
+  podSelector: {}
   policyTypes:
   - Egress
   egress:
   - to:
-    - podSelector:
-        matchLabels:
-          app: db
+    - namespaceSelector: {}
     ports:
-    - protocol: TCP
-      port: 6379
+    - protocol: UDP
+      port: 53
 ```
 </details>
 
 ---
 
-### Alıştırma 4: Namespace Bazlı İzin
-
-**Görev:** Belirli namespace'den gelen trafiğe izin ver.
+### Exercise 5: Combined Rules
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-from-prod
+  name: db-policy
 spec:
   podSelector:
     matchLabels:
       app: db
   policyTypes:
   - Ingress
+  - Egress
   ingress:
   - from:
-    - namespaceSelector:
+    - podSelector:
         matchLabels:
-          env: production
+          app: backend
+    ports:
+    - port: 5432
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: backend
 ```
 </details>
 
 ---
 
-### Alıştırma 5: IP Block
+## 🎯 Exam Practice
 
-**Görev:** Belirli IP aralığından erişime izin ver.
+### Scenario 1
+> Create NetworkPolicy that allows ingress to pods labeled `app=web` only from pods labeled `app=api` on port 80.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-external
-spec:
-  podSelector:
-    matchLabels:
-      app: frontend
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - ipBlock:
-        cidr: 10.0.0.0/8
-        except:
-        - 10.0.1.0/24
-```
-</details>
-
----
-
-## 🎯 Sınav Pratiği
-
-### Senaryo 1
-> `app=web` pod'larına sadece `app=api` pod'larından port 80 erişimine izin ver.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: web-policy
+  name: web-allow-api
 spec:
   podSelector:
     matchLabels:
@@ -282,48 +206,40 @@ spec:
 
 ---
 
-### Senaryo 2
-> Tüm egress trafiğini engelle, sadece DNS'e (port 53) izin ver.
+### Scenario 2
+> Create default deny egress policy for all pods.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-dns-only
+  name: deny-egress
 spec:
   podSelector: {}
   policyTypes:
   - Egress
-  egress:
-  - ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53
 ```
 </details>
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 kubectl delete networkpolicy --all
-kubectl delete pod --all
-kubectl delete svc frontend backend db
 ```
 
 ---
 
-## ✅ Tüm Labları Tamamladın! 🎉
+## ✅ What We Learned
 
-- [x] Ingress kuralları
-- [x] Egress kuralları
-- [x] podSelector ve namespaceSelector
-- [x] Default deny pattern
+- [x] NetworkPolicy basics
+- [x] Ingress and Egress rules
+- [x] Pod and namespace selectors
+- [x] Default deny patterns
 
 ---
 

@@ -1,103 +1,88 @@
 # Lab 05: ConfigMaps & Secrets
 
-## 🎯 Öğrenme Hedefleri
-- ConfigMap oluşturmak ve kullanmak
-- Secret oluşturmak ve kullanmak
-- Environment variable olarak kullanmak
-- Volume olarak mount etmek
+## 🎯 Learning Objectives
+- Create and use ConfigMaps
+- Create and use Secrets
+- Environment variables from ConfigMaps/Secrets
+- Mount as volumes
 
 ---
 
 ## 📖 ConfigMap vs Secret
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
     subgraph "ConfigMap"
-        CM[app-config<br/>APP_ENV=prod<br/>LOG_LEVEL=info]
+        CM[Non-sensitive data<br/>Plain text]
     end
     
     subgraph "Secret"
-        SEC[db-secret<br/>password=***<br/>api-key=***]
+        SEC[Sensitive data<br/>Base64 encoded]
     end
     
-    CM --> |env var| POD[Pod]
-    SEC --> |env var| POD
-    CM --> |volume| POD
-    SEC --> |volume| POD
+    CM --> |ENV or Volume| POD[Pod]
+    SEC --> |ENV or Volume| POD
 ```
 
-| Kaynak | Kullanım | Saklama |
-|--------|----------|---------|
-| **ConfigMap** | Genel config | Plain text |
-| **Secret** | Hassas veri | Base64 |
+| Feature | ConfigMap | Secret |
+|---------|-----------|--------|
+| **Data Type** | Plain text | Base64 encoded |
+| **Use Case** | Config files, env vars | Passwords, tokens, keys |
+| **Visibility** | Visible in `kubectl get` | Hidden by default |
 
 ---
 
-## 🔨 ConfigMap Alıştırmaları
+## 🔨 ConfigMap Exercises
 
-### Alıştırma 1: Literal ile ConfigMap
+### Exercise 1: Create ConfigMap (literal)
 
-**Görev:** Key-value ile ConfigMap oluştur.
+**Task:** Create a ConfigMap named `app-config` with key `APP_ENV=production`.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-kubectl create configmap app-config \
-  --from-literal=APP_ENV=production \
-  --from-literal=LOG_LEVEL=info
+kubectl create configmap app-config --from-literal=APP_ENV=production --from-literal=LOG_LEVEL=info
 ```
 
-Kontrol:
+Check:
 ```bash
-kubectl get configmap app-config -o yaml
+kubectl get cm app-config
+kubectl describe cm app-config
 ```
 </details>
 
 ---
 
-### Alıştırma 2: Dosyadan ConfigMap
-
-**Görev:** Dosyadan ConfigMap oluştur.
+### Exercise 2: Create ConfigMap (from file)
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Config dosyası oluştur
-cat <<EOF > app.properties
-db.host=localhost
-db.port=5432
-db.name=myapp
-EOF
+# Create a config file
+echo "database_host=db.example.com
+database_port=5432" > config.txt
 
-# ConfigMap oluştur
-kubectl create configmap file-config --from-file=app.properties
-
-# Kontrol
-kubectl get configmap file-config -o yaml
+kubectl create configmap file-config --from-file=config.txt
 ```
 </details>
 
 ---
 
-### Alıştırma 3: ConfigMap → Env Variable
+### Exercise 3: ConfigMap as Environment Variables
 
-```mermaid
-graph LR
-    CM[ConfigMap<br/>APP_ENV=prod] --> |envFrom| POD[Pod<br/>$APP_ENV]
-```
-
-**Görev:** ConfigMap'i environment variable olarak kullan.
+**Task:** Use ConfigMap values as environment variables in a pod.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: env-pod
+  name: cm-env-pod
 spec:
   containers:
   - name: app
@@ -108,10 +93,10 @@ spec:
         name: app-config
 ```
 
-Tek key için:
+Or specific keys:
 ```yaml
 env:
-- name: MY_ENV
+- name: MY_APP_ENV
   valueFrom:
     configMapKeyRef:
       name: app-config
@@ -121,32 +106,28 @@ env:
 
 ---
 
-### Alıştırma 4: ConfigMap → Volume
+### Exercise 4: ConfigMap as Volume
 
-```mermaid
-graph LR
-    CM[ConfigMap] --> |mount| VOL[/config/]
-    VOL --> F1[app.properties]
-```
+**Task:** Mount ConfigMap as a file.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: vol-pod
+  name: cm-vol-pod
 spec:
   containers:
   - name: app
     image: busybox
-    command: ["sh", "-c", "cat /config/app.properties && sleep 3600"]
+    command: ["sh", "-c", "cat /config/config.txt && sleep 3600"]
     volumeMounts:
-    - name: config
+    - name: config-volume
       mountPath: /config
   volumes:
-  - name: config
+  - name: config-volume
     configMap:
       name: file-config
 ```
@@ -154,76 +135,49 @@ spec:
 
 ---
 
-## 🔨 Secret Alıştırmaları
+## 🔨 Secret Exercises
 
-### Alıştırma 5: Secret Oluştur
+### Exercise 5: Create Secret
 
-**Görev:** Username ve password içeren secret oluştur.
+**Task:** Create a Secret named `db-secret` with `DB_PASSWORD=mysecret123`.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-kubectl create secret generic db-secret \
-  --from-literal=username=admin \
-  --from-literal=password=S3cr3t!
+kubectl create secret generic db-secret --from-literal=DB_PASSWORD=mysecret123
 ```
 
-Kontrol:
+Check:
 ```bash
-kubectl get secret db-secret -o yaml
-# data base64 encoded görünür
+kubectl get secret db-secret
+kubectl describe secret db-secret  # Values hidden
+kubectl get secret db-secret -o yaml  # Base64 encoded
+```
+</details>
+
+---
+
+### Exercise 6: Decode Secret
+
+<details>
+<summary>✅ Solution</summary>
+
+```bash
+# Get base64 value
+kubectl get secret db-secret -o jsonpath='{.data.DB_PASSWORD}'
 
 # Decode
-kubectl get secret db-secret -o jsonpath='{.data.password}' | base64 -d
+kubectl get secret db-secret -o jsonpath='{.data.DB_PASSWORD}' | base64 -d
 ```
 </details>
 
 ---
 
-### Alıştırma 6: YAML ile Secret
-
-**Görev:** YAML ile secret oluştur.
+### Exercise 7: Secret as Environment Variable
 
 <details>
-<summary>✅ Çözüm</summary>
-
-**stringData ile (otomatik encode):**
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: easy-secret
-type: Opaque
-stringData:
-  username: myuser
-  password: mypass123
-```
-
-**data ile (manuel base64):**
-```bash
-echo -n "myuser" | base64    # bXl1c2Vy
-echo -n "mypass123" | base64 # bXlwYXNzMTIz
-```
-
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: manual-secret
-type: Opaque
-data:
-  username: bXl1c2Vy
-  password: bXlwYXNzMTIz
-```
-</details>
-
----
-
-### Alıştırma 7: Secret → Env Variable
-
-<details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -234,27 +188,22 @@ spec:
   containers:
   - name: app
     image: busybox
-    command: ["sh", "-c", "echo User:$DB_USER Pass:$DB_PASS && sleep 3600"]
+    command: ["sh", "-c", "echo $DB_PASSWORD && sleep 3600"]
     env:
-    - name: DB_USER
+    - name: DB_PASSWORD
       valueFrom:
         secretKeyRef:
           name: db-secret
-          key: username
-    - name: DB_PASS
-      valueFrom:
-        secretKeyRef:
-          name: db-secret
-          key: password
+          key: DB_PASSWORD
 ```
 </details>
 
 ---
 
-### Alıştırma 8: Secret → Volume
+### Exercise 8: Secret as Volume
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -265,13 +214,13 @@ spec:
   containers:
   - name: app
     image: busybox
-    command: ["sh", "-c", "cat /secrets/password && sleep 3600"]
+    command: ["sh", "-c", "cat /secrets/DB_PASSWORD && sleep 3600"]
     volumeMounts:
-    - name: secret-vol
+    - name: secret-volume
       mountPath: /secrets
       readOnly: true
   volumes:
-  - name: secret-vol
+  - name: secret-volume
     secret:
       secretName: db-secret
 ```
@@ -279,17 +228,26 @@ spec:
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-### Senaryo 1
-> `web-config` ConfigMap oluştur: `THEME=dark`. Bu ConfigMap'i kullanan `webapp` pod oluştur.
+### Scenario 1
+> Create ConfigMap `webapp-config` with `THEME=dark` and `CACHE_TTL=3600`.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-kubectl create configmap web-config --from-literal=THEME=dark
+kubectl create cm webapp-config --from-literal=THEME=dark --from-literal=CACHE_TTL=3600
 ```
+</details>
+
+---
+
+### Scenario 2
+> Create a pod that uses `webapp-config` as environment variables.
+
+<details>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -298,66 +256,34 @@ metadata:
   name: webapp
 spec:
   containers:
-  - name: nginx
+  - name: app
     image: nginx
     envFrom:
     - configMapRef:
-        name: web-config
+        name: webapp-config
 ```
 </details>
 
 ---
 
-### Senaryo 2
-> `api-secret` adında secret oluştur: `API_KEY=xyz789`. `/etc/api/` dizinine mount et.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```bash
-kubectl create secret generic api-secret --from-literal=API_KEY=xyz789
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: api-pod
-spec:
-  containers:
-  - name: app
-    image: busybox
-    command: ["sleep", "3600"]
-    volumeMounts:
-    - name: api-vol
-      mountPath: /etc/api
-  volumes:
-  - name: api-vol
-    secret:
-      secretName: api-secret
-```
-</details>
-
----
-
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 kubectl delete pod --all
-kubectl delete configmap --all
-kubectl delete secret --all
-rm -f app.properties
+kubectl delete cm app-config file-config webapp-config --ignore-not-found
+kubectl delete secret db-secret --ignore-not-found
+rm -f config.txt
 ```
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] ConfigMap oluşturma (literal, file)
-- [x] Secret oluşturma
-- [x] envFrom ve valueFrom
-- [x] Volume mount
-- [x] Base64 encoding
+- [x] Create ConfigMaps (literal, file)
+- [x] Create Secrets
+- [x] Use as environment variables
+- [x] Mount as volumes
+- [x] Base64 encoding/decoding
 
 ---
 

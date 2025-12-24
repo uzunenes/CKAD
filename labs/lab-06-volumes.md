@@ -1,23 +1,24 @@
 # Lab 06: Volumes & PersistentVolumes
 
-## 🎯 Öğrenme Hedefleri
-- Volume türlerini anlamak
-- emptyDir ve hostPath kullanmak
-- PersistentVolume (PV) ve PersistentVolumeClaim (PVC)
-- K3s Local Path Provisioner
+## 🎯 Learning Objectives
+- Understand volume types
+- Use emptyDir and hostPath
+- Create PersistentVolume and PersistentVolumeClaim
+- K3s local-path provisioner
 
 ---
 
-## 📖 Volume Türleri
+## 📖 Volume Types
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
-    subgraph "Ephemeral (Geçici)"
-        ED[emptyDir<br/>Pod ölünce silinir]
+    subgraph "Ephemeral"
+        ED[emptyDir<br/>Pod lifetime]
     end
     
-    subgraph "Node-Level"
-        HP[hostPath<br/>Node'a bağlı]
+    subgraph "Node Storage"
+        HP[hostPath<br/>Node filesystem]
     end
     
     subgraph "Persistent"
@@ -26,22 +27,22 @@ graph TB
     end
 ```
 
-| Tür | Yaşam Süresi | Kullanım |
-|-----|--------------|----------|
-| **emptyDir** | Pod ile birlikte | Geçici cache, container arası paylaşım |
-| **hostPath** | Node'a bağlı | Test, özel durumlar |
-| **PV/PVC** | Bağımsız | Kalıcı veri |
+| Type | Lifetime | Use Case |
+|------|----------|----------|
+| **emptyDir** | Pod lifetime | Temp files, cache |
+| **hostPath** | Node lifetime | Testing only |
+| **PV/PVC** | Independent | Production data |
 
 ---
 
-## 🔨 Pratik Alıştırmalar
+## 🔨 Hands-on Exercises
 
-### Alıştırma 1: emptyDir
+### Exercise 1: emptyDir
 
-**Görev:** İki container arası veri paylaşımı.
+**Task:** Create a pod with emptyDir volume shared between containers.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -52,35 +53,32 @@ spec:
   containers:
   - name: writer
     image: busybox
-    command: ["sh", "-c", "echo Merhaba > /data/msg && sleep 3600"]
+    command: ["sh", "-c", "echo 'Hello' > /data/file.txt && sleep 3600"]
     volumeMounts:
-    - name: shared
+    - name: shared-data
       mountPath: /data
+  
   - name: reader
     image: busybox
-    command: ["sh", "-c", "cat /data/msg && sleep 3600"]
+    command: ["sh", "-c", "cat /data/file.txt && sleep 3600"]
     volumeMounts:
-    - name: shared
+    - name: shared-data
       mountPath: /data
+  
   volumes:
-  - name: shared
+  - name: shared-data
     emptyDir: {}
-```
-
-```bash
-kubectl apply -f emptydir-pod.yaml
-kubectl logs emptydir-pod -c reader
 ```
 </details>
 
 ---
 
-### Alıştırma 2: hostPath
+### Exercise 2: hostPath
 
-⚠️ Production'da dikkatli kullan!
+**Task:** Mount node's `/tmp` directory into a pod.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -91,32 +89,28 @@ spec:
   containers:
   - name: app
     image: busybox
-    command: ["sh", "-c", "ls /host && sleep 3600"]
+    command: ["sleep", "3600"]
     volumeMounts:
-    - name: hostdir
-      mountPath: /host
+    - name: host-volume
+      mountPath: /host-data
   volumes:
-  - name: hostdir
+  - name: host-volume
     hostPath:
-      path: /tmp/k3s-test
-      type: DirectoryOrCreate
+      path: /tmp
+      type: Directory
 ```
+
+⚠️ **Warning:** hostPath is not recommended for production!
 </details>
 
 ---
 
-### Alıştırma 3: PersistentVolume Oluştur
+### Exercise 3: PersistentVolume (Static)
 
-```mermaid
-graph LR
-    ADMIN[Admin] --> PV[PersistentVolume<br/>1Gi]
-    DEV[Developer] --> PVC[PersistentVolumeClaim<br/>500Mi]
-    PVC --> |Bound| PV
-    POD[Pod] --> PVC
-```
+**Task:** Create a PersistentVolume.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -127,51 +121,35 @@ spec:
   capacity:
     storage: 1Gi
   accessModes:
-  - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
+    - ReadWriteOnce
   hostPath:
-    path: /tmp/pv-data
-```
-
-```bash
-kubectl apply -f my-pv.yaml
-kubectl get pv
-```
-</details>
-
+    path: /tmp/my-pv
 ---
-
-### Alıştırma 4: PersistentVolumeClaim
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: my-pvc
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: 500Mi
 ```
 
 ```bash
-kubectl apply -f my-pvc.yaml
+kubectl apply -f pv-pvc.yaml
+kubectl get pv
 kubectl get pvc
-kubectl get pv  # STATUS: Bound
 ```
 </details>
 
 ---
 
-### Alıştırma 5: PVC Kullanan Pod
+### Exercise 4: Use PVC in Pod
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -181,13 +159,12 @@ metadata:
 spec:
   containers:
   - name: app
-    image: busybox
-    command: ["sh", "-c", "echo Kalıcı veri > /data/test && cat /data/test && sleep 3600"]
+    image: nginx
     volumeMounts:
-    - name: storage
-      mountPath: /data
+    - name: data
+      mountPath: /usr/share/nginx/html
   volumes:
-  - name: storage
+  - name: data
     persistentVolumeClaim:
       claimName: my-pvc
 ```
@@ -195,19 +172,13 @@ spec:
 
 ---
 
-### Alıştırma 6: K3s Local Path Provisioner
+### Exercise 5: K3s Dynamic Provisioning
 
-K3s otomatik olarak **local-path** StorageClass sağlar!
+K3s includes `local-path` provisioner for automatic PV creation.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
-```bash
-# StorageClass'ları listele
-kubectl get storageclass
-```
-
-Dinamik PVC (PV otomatik oluşur):
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -215,7 +186,7 @@ metadata:
   name: dynamic-pvc
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   storageClassName: local-path  # K3s default
   resources:
     requests:
@@ -225,105 +196,90 @@ spec:
 ```bash
 kubectl apply -f dynamic-pvc.yaml
 kubectl get pvc
-kubectl get pv  # Otomatik oluştu!
+# Status will be Bound automatically!
 ```
 </details>
 
 ---
 
-### Access Modes
+### Exercise 6: Access Modes
 
-| Mode | Kısaltma | Açıklama |
-|------|----------|----------|
-| ReadWriteOnce | RWO | Tek node read/write |
-| ReadOnlyMany | ROX | Çok node read-only |
-| ReadWriteMany | RWX | Çok node read/write |
+| Mode | Description |
+|------|-------------|
+| **ReadWriteOnce (RWO)** | Single node read/write |
+| **ReadOnlyMany (ROX)** | Multiple nodes read-only |
+| **ReadWriteMany (RWX)** | Multiple nodes read/write |
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-### Senaryo 1
-> `data-pod` oluştur, `/app/cache` dizinine emptyDir mount et.
+### Scenario 1
+> Create a pod with emptyDir volume mounted at `/cache`.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: data-pod
+  name: cache-pod
 spec:
   containers:
   - name: app
-    image: busybox
-    command: ["sleep", "3600"]
+    image: nginx
     volumeMounts:
-    - name: cache
-      mountPath: /app/cache
+    - name: cache-vol
+      mountPath: /cache
   volumes:
-  - name: cache
+  - name: cache-vol
     emptyDir: {}
 ```
 </details>
 
 ---
 
-### Senaryo 2
-> 2Gi PV ve 1Gi PVC oluştur, pod ile kullan.
+### Scenario 2
+> Create PVC named `data-pvc` requesting 2Gi storage.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
-# pv.yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: task-pv
-spec:
-  capacity:
-    storage: 2Gi
-  accessModes:
-  - ReadWriteOnce
-  hostPath:
-    path: /tmp/task-data
----
-# pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: task-pvc
+  name: data-pvc
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi
 ```
 </details>
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
-kubectl delete pod --all
-kubectl delete pvc --all
-kubectl delete pv --all
+kubectl delete pod emptydir-pod hostpath-pod pvc-pod cache-pod --ignore-not-found
+kubectl delete pvc my-pvc dynamic-pvc data-pvc --ignore-not-found
+kubectl delete pv my-pv --ignore-not-found
 ```
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] emptyDir volume
-- [x] hostPath volume
-- [x] PV ve PVC oluşturma
+- [x] emptyDir for temporary storage
+- [x] hostPath for node storage
+- [x] PersistentVolume and PersistentVolumeClaim
+- [x] Dynamic provisioning with StorageClass
 - [x] K3s local-path provisioner
-- [x] Access modes
 
 ---
 
-[⬅️ Lab 05](lab-05-configmaps-secrets.md) | [Lab 07: Jobs ➡️](lab-07-jobs-cronjobs.md)
+[⬅️ Lab 05](lab-05-configmaps-secrets.md) | [Lab 07: Jobs & CronJobs ➡️](lab-07-jobs-cronjobs.md)

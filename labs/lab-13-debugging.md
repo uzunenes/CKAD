@@ -1,220 +1,141 @@
 # Lab 13: Debugging & Troubleshooting
 
-## 🎯 Öğrenme Hedefleri
-- Pod sorunlarını tespit etmek
-- Hata ayıklama komutları
-- Common issues ve çözümleri
+## 🎯 Learning Objectives
+- Identify pod issues
+- Debugging commands
+- Common issues and solutions
 
 ---
 
-## 📖 Debugging Akışı
+## 📖 Debugging Flow
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart TD
-    START[Pod Sorunu] --> A{kubectl get pods}
-    A --> |Pending| B[Scheduling sorunu]
+    START[Pod Issue] --> A{kubectl get pods}
+    A --> |Pending| B[Scheduling issue]
     A --> |CrashLoopBackOff| C[Container crash]
-    A --> |ImagePullBackOff| D[Image sorunu]
-    A --> |Running ama çalışmıyor| E[App sorunu]
+    A --> |ImagePullBackOff| D[Image issue]
+    A --> |Running but not working| E[App issue]
     
     B --> B1[kubectl describe pod]
     C --> C1[kubectl logs]
-    D --> D1[Image adı/registry kontrol]
+    D --> D1[Check image name/registry]
     E --> E1[kubectl exec]
 ```
 
 ---
 
-## 🔨 Pratik Alıştırmalar
+## 🔨 Hands-on Exercises
 
-### Alıştırma 1: Pod Durumlarını Anlama
+### Exercise 1: Pod States
 
-| Status | Anlam | Çözüm |
-|--------|-------|-------|
-| `Pending` | Schedule edilemedi | Node resources, taints kontrol |
-| `ContainerCreating` | Image çekiliyor | Bekle veya image kontrol |
-| `Running` | Çalışıyor | - |
-| `CrashLoopBackOff` | Container sürekli crash | Logs kontrol |
-| `ImagePullBackOff` | Image çekilemedi | Image adı/registry kontrol |
-| `Error` | Hata | describe/logs kontrol |
+| Status | Meaning | Solution |
+|--------|---------|----------|
+| `Pending` | Can't schedule | Check resources, taints |
+| `ContainerCreating` | Pulling image | Wait or check image |
+| `Running` | Working | - |
+| `CrashLoopBackOff` | Keeps crashing | Check logs |
+| `ImagePullBackOff` | Can't pull image | Check image name |
+| `Error` | Error occurred | Check describe/logs |
 
 ---
 
-### Alıştırma 2: kubectl describe
-
-**Görev:** Sorunlu pod'u incele.
-
-```bash
-# Hatalı pod oluştur
-kubectl run broken --image=nginx:yanlis-tag
-```
+### Exercise 2: kubectl describe
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
+# Create a broken pod
+kubectl run broken --image=nginx:wrong-tag
+
 kubectl describe pod broken
-```
-
-Events bölümüne bak:
-```
-Events:
-  Type     Reason     Age   From               Message
-  Warning  Failed     10s   kubelet            Failed to pull image "nginx:yanlis-tag"
-  Warning  Failed     10s   kubelet            Error: ErrImagePull
-```
-
-Düzeltme:
-```bash
-kubectl set image pod/broken broken=nginx:latest
-# veya sil ve yeniden oluştur
+# Look at Events section
 ```
 </details>
 
 ---
 
-### Alıştırma 3: kubectl logs
-
-**Görev:** Container loglarını incele.
-
-```bash
-# Crash eden pod oluştur
-kubectl run crash-pod --image=busybox --command -- /bin/sh -c "exit 1"
-```
+### Exercise 3: kubectl logs
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Mevcut container logu
-kubectl logs crash-pod
+# Current logs
+kubectl logs <pod>
 
-# Önceki (crashed) container logu
-kubectl logs crash-pod --previous
+# Previous (crashed) container
+kubectl logs <pod> --previous
 
-# Canlı takip
-kubectl logs -f crash-pod
+# Follow logs
+kubectl logs -f <pod>
 
-# Son N satır
-kubectl logs --tail=20 crash-pod
+# Last N lines
+kubectl logs --tail=20 <pod>
 
-# Multi-container pod için
+# Multi-container pod
 kubectl logs <pod> -c <container>
 ```
 </details>
 
 ---
 
-### Alıştırma 4: kubectl exec ile Debug
-
-**Görev:** Container içinde debug yap.
+### Exercise 4: kubectl exec
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Komutu çalıştır
+# Run a command
 kubectl exec <pod> -- ls -la /
 
 # Interactive shell
 kubectl exec -it <pod> -- /bin/sh
 
-# Belirli container
-kubectl exec -it <pod> -c <container> -- /bin/bash
-
 # Network debug
 kubectl exec <pod> -- curl -s localhost:80
-kubectl exec <pod> -- wget -qO- google.com
 kubectl exec <pod> -- nslookup kubernetes
 ```
 </details>
 
 ---
 
-### Alıştırma 5: Events İnceleme
+### Exercise 5: Events
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Tüm events (son 1 saat)
+# All events
 kubectl get events --sort-by='.lastTimestamp'
 
-# Warnings
+# Warnings only
 kubectl get events --field-selector type=Warning
 
-# Belirli pod
+# Specific pod
 kubectl get events --field-selector involvedObject.name=<pod>
 ```
 </details>
 
 ---
 
-### Alıştırma 6: Resource Sorunları
-
-**Görev:** Resource yetersizliğini tespit et.
+### Exercise 6: Network Debugging
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Node kaynaklarını gör
-kubectl describe nodes | grep -A5 "Allocated resources"
-
-# Pod resource kullanımı (metrics-server gerekli)
-kubectl top pods
-kubectl top nodes
-```
-
-Pending pod için:
-```bash
-kubectl describe pod <pending-pod>
-# Events: 0/1 nodes are available: insufficient memory
-```
-</details>
-
----
-
-### Alıştırma 7: Network Debugging
-
-**Görev:** Servis erişim sorununu debug et.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```bash
-# Service endpoints kontrol
+# Check service endpoints
 kubectl get endpoints <service>
 
-# DNS çözümleme test
+# DNS test
 kubectl run dns-test --image=busybox --rm -it --restart=Never -- nslookup <service>
 
-# Servis erişim test
+# Service access test
 kubectl run test --image=busybox --rm -it --restart=Never -- wget -qO- <service>:<port>
-
-# Pod IP'leri kontrol
-kubectl get pods -o wide
 ```
-</details>
-
----
-
-### Alıştırma 8: Debug Container (Ephemeral)
-
-**Görev:** Çalışan pod'a debug container ekle.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```bash
-# Distroless veya minimal image'lı pod debug
-kubectl debug <pod> -it --image=busybox --target=<container>
-
-# Node debug
-kubectl debug node/<node> -it --image=busybox
-```
-
-Not: Kubernetes 1.25+ gerektirir.
 </details>
 
 ---
@@ -223,50 +144,50 @@ Not: Kubernetes 1.25+ gerektirir.
 
 ### ImagePullBackOff
 ```bash
-# Kontrol
+# Check
 kubectl describe pod <pod> | grep -A3 Events
 
-# Çözümler
-# 1. Image adı yanlış
-# 2. Private registry - imagePullSecrets eksik
-# 3. Tag mevcut değil
+# Solutions:
+# 1. Wrong image name
+# 2. Private registry - imagePullSecrets missing
+# 3. Tag doesn't exist
 ```
 
 ### CrashLoopBackOff
 ```bash
-# Kontrol
+# Check
 kubectl logs <pod> --previous
 
-# Çözümler
-# 1. Command/args yanlış
-# 2. App hatası
-# 3. Liveness probe çok agresif
+# Solutions:
+# 1. Wrong command/args
+# 2. App error
+# 3. Liveness probe too aggressive
 ```
 
 ### Pending
 ```bash
-# Kontrol
+# Check
 kubectl describe pod <pod>
 
-# Çözümler
+# Solutions:
 # 1. Insufficient resources
 # 2. Node selector/affinity
 # 3. Taints/tolerations
-# 4. PVC binding bekliyor
+# 4. PVC not bound
 ```
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-### Senaryo 1 ⭐
-> `web-pod` running ama web sayfası açılmıyor. Debug et.
+### Scenario 1
+> `web-pod` is running but webpage not loading. Debug it.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# 1. Pod durumu
+# 1. Pod status
 kubectl get pod web-pod
 
 # 2. Describe
@@ -275,10 +196,10 @@ kubectl describe pod web-pod
 # 3. Logs
 kubectl logs web-pod
 
-# 4. Container içinden test
+# 4. Test from inside
 kubectl exec web-pod -- curl localhost:80
 
-# 5. Service kontrol
+# 5. Check service
 kubectl get svc
 kubectl get endpoints
 ```
@@ -286,39 +207,22 @@ kubectl get endpoints
 
 ---
 
-### Senaryo 2 ⭐
-> `api-pod` CrashLoopBackOff durumunda. Hatayı bul.
-
-<details>
-<summary>✅ Çözüm</summary>
+## 🧹 Cleanup
 
 ```bash
-# Önceki container logları
-kubectl logs api-pod --previous
-
-# Describe ile events
-kubectl describe pod api-pod
-```
-</details>
-
----
-
-## 🧹 Temizlik
-
-```bash
-kubectl delete pod broken crash-pod --ignore-not-found
+kubectl delete pod broken --ignore-not-found
 ```
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Pod durumlarını anlama
+- [x] Understanding pod states
 - [x] kubectl describe
 - [x] kubectl logs (--previous, -f)
 - [x] kubectl exec
 - [x] kubectl get events
-- [x] Common issues ve çözümleri
+- [x] Common issues and solutions
 
 ---
 

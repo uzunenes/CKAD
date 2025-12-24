@@ -1,20 +1,21 @@
-# Lab 15: Canary & Blue-Green Deployments
+# Lab 15: Blue-Green & Canary Deployments
 
-## 🎯 Öğrenme Hedefleri
-- Blue-Green deployment stratejisi
-- Canary deployment stratejisi
-- Service selector ile traffic yönetimi
+## 🎯 Learning Objectives
+- Blue-Green deployment strategy
+- Canary deployment strategy
+- Traffic management with service selector
 
 ---
 
-## 📖 Deployment Stratejileri
+## 📖 Deployment Strategies
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
     subgraph "Blue-Green"
         LB1[Service] --> BLUE[Blue v1<br/>100%]
         LB1 -.-> GREEN[Green v2<br/>0%]
-        SWITCH[Anlık Geçiş] --> LB1
+        SWITCH[Instant Switch] --> LB1
     end
     
     subgraph "Canary"
@@ -23,25 +24,22 @@ graph TB
     end
 ```
 
-| Strateji | Açıklama | Risk |
-|----------|----------|------|
-| **Blue-Green** | Anlık geçiş, eski versiyon hazırda | Düşük |
-| **Canary** | Kademeli geçiş, küçük trafikle test | Çok düşük |
-| **Rolling** | Varsayılan K8s, kademeli güncelleme | Orta |
+| Strategy | Description | Risk |
+|----------|-------------|------|
+| **Blue-Green** | Instant switch, old version standby | Low |
+| **Canary** | Gradual rollout, test with small traffic | Very low |
+| **Rolling** | Default K8s, gradual update | Medium |
 
 ---
 
 ## 🔨 Blue-Green Deployment
 
-### Alıştırma 1: Blue Deployment
-
-**Görev:** Blue (v1) deployment oluştur.
+### Exercise 1: Blue Deployment
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
-# blue-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,24 +59,17 @@ spec:
       containers:
       - name: app
         image: nginx:1.19
-        ports:
-        - containerPort: 80
-```
-
-```bash
-kubectl apply -f blue-deployment.yaml
 ```
 </details>
 
 ---
 
-### Alıştırma 2: Service (Blue'ya yönlendir)
+### Exercise 2: Service (Point to Blue)
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
-# service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -86,28 +77,20 @@ metadata:
 spec:
   selector:
     app: myapp
-    version: blue  # Blue'ya yönlendir
+    version: blue  # Points to blue
   ports:
   - port: 80
-    targetPort: 80
-```
-
-```bash
-kubectl apply -f service.yaml
 ```
 </details>
 
 ---
 
-### Alıştırma 3: Green Deployment
-
-**Görev:** Green (v2) deployment oluştur ama henüz traffic verme.
+### Exercise 3: Green Deployment
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
-# green-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -127,70 +110,37 @@ spec:
       containers:
       - name: app
         image: nginx:1.21
-        ports:
-        - containerPort: 80
-```
-
-```bash
-kubectl apply -f green-deployment.yaml
-
-# Her iki deployment çalışıyor
-kubectl get pods -l app=myapp
 ```
 </details>
 
 ---
 
-### Alıştırma 4: Blue → Green Geçişi
-
-**Görev:** Service selector'ı green'e çevir.
+### Exercise 4: Switch Blue → Green
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Service'i patch ile güncelle
+# Patch service selector
 kubectl patch svc myapp-svc -p '{"spec":{"selector":{"version":"green"}}}'
-
-# veya edit
-kubectl edit svc myapp-svc
-# version: blue → version: green
 ```
 
-Anlık geçiş! Tüm traffic artık green'e gidiyor.
-</details>
-
----
-
-### Alıştırma 5: Rollback (Green → Blue)
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```bash
-kubectl patch svc myapp-svc -p '{"spec":{"selector":{"version":"blue"}}}'
-```
+Instant switch! All traffic goes to green.
 </details>
 
 ---
 
 ## 🔨 Canary Deployment
 
-### Alıştırma 6: Canary Setup
+### Exercise 5: Canary Setup
 
-```mermaid
-graph LR
-    SVC[Service<br/>app=myapp] --> STABLE[Stable<br/>replicas: 9]
-    SVC --> CANARY[Canary<br/>replicas: 1]
-```
-
-**Görev:** %10 traffic canary'ye gidecek şekilde ayarla.
+10% traffic to canary.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
-# stable-deployment.yaml
+# Stable: 9 replicas
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -211,7 +161,7 @@ spec:
       - name: app
         image: nginx:1.19
 ---
-# canary-deployment.yaml
+# Canary: 1 replica
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -232,61 +182,55 @@ spec:
       - name: app
         image: nginx:1.21
 ---
-# service.yaml (sadece app=myapp seç)
+# Service selects both
 apiVersion: v1
 kind: Service
 metadata:
   name: myapp-svc
 spec:
   selector:
-    app: myapp  # Her iki deployment'ı seçer
+    app: myapp  # Selects both deployments
   ports:
   - port: 80
 ```
 
-9 stable + 1 canary = %10 canary traffic
+9 stable + 1 canary = 10% canary traffic
 </details>
 
 ---
 
-### Alıştırma 7: Canary Scale Up
-
-**Görev:** Canary başarılıysa %50'ye çıkar.
+### Exercise 6: Scale Up Canary
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl scale deployment app-stable --replicas=5
 kubectl scale deployment app-canary --replicas=5
+# Now 50/50 traffic
 ```
 </details>
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-### Senaryo 1 ⭐
-> Mevcut `web-blue` deployment var. `web-green` oluştur ve `web-svc` service'ini green'e yönlendir.
+### Scenario 1
+> `web-blue` deployment exists. Create `web-green` and switch `web-svc` to green.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Green deployment
 kubectl create deployment web-green --image=nginx:1.21
-
-# Label ekle
 kubectl label deployment web-green version=green
-
-# Service selector güncelle
 kubectl patch svc web-svc -p '{"spec":{"selector":{"version":"green"}}}'
 ```
 </details>
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 kubectl delete deployment app-blue app-green app-stable app-canary --ignore-not-found
@@ -295,12 +239,12 @@ kubectl delete svc myapp-svc --ignore-not-found
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
 - [x] Blue-Green deployment
-- [x] Service selector ile traffic yönetimi
+- [x] Traffic management with service selector
 - [x] Canary deployment
-- [x] Anlık vs kademeli geçiş
+- [x] Instant vs gradual rollout
 
 ---
 

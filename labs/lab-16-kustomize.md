@@ -1,16 +1,17 @@
 # Lab 16: Kustomize
 
-## 🎯 Öğrenme Hedefleri
-- Kustomize nedir anlamak
-- Base ve overlay yapısı
-- kubectl kustomize kullanımı
-- Patches ve transformations
+## 🎯 Learning Objectives
+- Understand Kustomize
+- Base and overlay structure
+- kubectl kustomize
+- Patches and transformations
 
 ---
 
-## 📖 Kustomize Nedir?
+## 📖 What is Kustomize?
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
     subgraph "Base"
         B[deployment.yaml<br/>service.yaml]
@@ -28,16 +29,16 @@ graph TB
     PROD --> |kustomize build| P[Prod YAML]
 ```
 
-**Kustomize**, YAML dosyalarını template olmadan özelleştirmeye yarar:
-- ✅ kubectl'e entegre (`kubectl apply -k`)
-- ✅ Helm'e alternatif
-- ✅ Base + Overlay yapısı
+**Kustomize** customizes YAML without templates:
+- ✅ Built into kubectl (`kubectl apply -k`)
+- ✅ Alternative to Helm
+- ✅ Base + Overlay structure
 
 ---
 
-## 🔨 Pratik Alıştırmalar
+## 🔨 Hands-on Exercises
 
-### Hazırlık: Klasör Yapısı
+### Setup: Directory Structure
 
 ```bash
 mkdir -p kustomize-demo/{base,overlays/dev,overlays/prod}
@@ -46,12 +47,10 @@ cd kustomize-demo
 
 ---
 
-### Alıştırma 1: Base Oluştur
-
-**Görev:** Base deployment ve service oluştur.
+### Exercise 1: Create Base
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 # base/deployment.yaml
@@ -73,21 +72,6 @@ spec:
       containers:
       - name: app
         image: nginx:1.19
-        ports:
-        - containerPort: 80
-EOF
-
-# base/service.yaml
-cat <<EOF > base/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: myapp-svc
-spec:
-  selector:
-    app: myapp
-  ports:
-  - port: 80
 EOF
 
 # base/kustomization.yaml
@@ -96,19 +80,16 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - deployment.yaml
-- service.yaml
 EOF
 ```
 </details>
 
 ---
 
-### Alıştırma 2: Dev Overlay
-
-**Görev:** Dev ortamı için overlay oluştur (1 replica, dev- prefix).
+### Exercise 2: Dev Overlay
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 cat <<EOF > overlays/dev/kustomization.yaml
@@ -132,12 +113,10 @@ EOF
 
 ---
 
-### Alıştırma 3: Prod Overlay
-
-**Görev:** Prod ortamı için overlay oluştur (5 replica, prod- prefix).
+### Exercise 3: Prod Overlay
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 cat <<EOF > overlays/prod/kustomization.yaml
@@ -165,51 +144,45 @@ EOF
 
 ---
 
-### Alıştırma 4: Kustomize Build
-
-**Görev:** Oluşan YAML'ları önizle.
+### Exercise 4: Build and Preview
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Dev overlay önizle
+# Preview dev
 kubectl kustomize overlays/dev
 
-# Prod overlay önizle
+# Preview prod
 kubectl kustomize overlays/prod
 
-# Dosyaya kaydet
+# Save to file
 kubectl kustomize overlays/prod > prod-manifests.yaml
 ```
 </details>
 
 ---
 
-### Alıştırma 5: Kustomize Apply
-
-**Görev:** Dev ortamını deploy et.
+### Exercise 5: Apply with Kustomize
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# -k flag ile apply
+# Apply with -k flag
 kubectl apply -k overlays/dev
 
-# Kontrol
+# Check
 kubectl get all -l env=development
 ```
 </details>
 
 ---
 
-### Alıştırma 6: Patch Kullanımı
-
-**Görev:** Specific değişiklikler için patch ekle.
+### Exercise 6: Patches
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 # overlays/prod/memory-patch.yaml
@@ -226,118 +199,44 @@ spec:
         resources:
           limits:
             memory: "256Mi"
-          requests:
-            memory: "128Mi"
 EOF
 
-# kustomization.yaml güncelle
-cat <<EOF > overlays/prod/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- ../../base
-
-namePrefix: prod-
-
-replicas:
-- name: myapp
-  count: 5
+# Add to kustomization.yaml
+cat <<EOF >> overlays/prod/kustomization.yaml
 
 patches:
 - path: memory-patch.yaml
-
-commonLabels:
-  env: production
-
-images:
-- name: nginx
-  newTag: "1.21"
-EOF
-```
-
-```bash
-kubectl kustomize overlays/prod
-```
-</details>
-
----
-
-### Alıştırma 7: ConfigMap Generator
-
-**Görev:** Kustomize ile ConfigMap oluştur.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```bash
-# base/kustomization.yaml güncelle
-cat <<EOF > base/kustomization.yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-- deployment.yaml
-- service.yaml
-
-configMapGenerator:
-- name: app-config
-  literals:
-  - APP_ENV=default
-  - LOG_LEVEL=info
 EOF
 ```
 </details>
 
 ---
 
-### Alıştırma 8: Secret Generator
+## 📖 Kustomization.yaml Options
 
-<details>
-<summary>✅ Çözüm</summary>
-
-```bash
-cat <<EOF >> base/kustomization.yaml
-
-secretGenerator:
-- name: app-secrets
-  literals:
-  - DB_PASSWORD=secret123
-EOF
-```
-
-ConfigMap/Secret otomatik hash suffix alır (değişiklik = yeni versiyon).
-</details>
+| Option | Description |
+|--------|-------------|
+| `resources` | Base YAML files |
+| `namePrefix` | Add prefix to all names |
+| `nameSuffix` | Add suffix to all names |
+| `namespace` | Set namespace |
+| `commonLabels` | Add labels to all resources |
+| `images` | Change image tags |
+| `replicas` | Change replica count |
+| `patches` | Strategic merge patches |
+| `configMapGenerator` | Generate ConfigMaps |
 
 ---
 
-## 📖 Kustomization.yaml Özellikleri
+## 🎯 Exam Practice
 
-| Özellik | Açıklama |
-|---------|----------|
-| `resources` | Base YAML dosyaları |
-| `namePrefix` | Tüm isimlere prefix |
-| `nameSuffix` | Tüm isimlere suffix |
-| `namespace` | Namespace ayarla |
-| `commonLabels` | Tüm kaynaklara label |
-| `commonAnnotations` | Tüm kaynaklara annotation |
-| `images` | Image tag değiştir |
-| `replicas` | Replica sayısı değiştir |
-| `patches` | Strategic merge patch |
-| `configMapGenerator` | ConfigMap oluştur |
-| `secretGenerator` | Secret oluştur |
-
----
-
-## 🎯 Sınav Pratiği
-
-### Senaryo 1 ⭐
-> Mevcut `base/` klasöründeki deployment'a namespace ekleyerek deploy et.
+### Scenario 1
+> Apply `base/` with namespace `production`.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# overlay/kustomization.yaml
 cat <<EOF > overlay/kustomization.yaml
 resources:
 - ../base
@@ -350,7 +249,7 @@ kubectl apply -k overlay/
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 kubectl delete -k overlays/dev --ignore-not-found
@@ -360,13 +259,13 @@ cd .. && rm -rf kustomize-demo
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Base ve overlay yapısı
-- [x] kustomization.yaml yazma
+- [x] Base and overlay structure
+- [x] kustomization.yaml
 - [x] kubectl kustomize / kubectl apply -k
 - [x] Patches
-- [x] ConfigMap/Secret generators
+- [x] ConfigMap generators
 
 ---
 

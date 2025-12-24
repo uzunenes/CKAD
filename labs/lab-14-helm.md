@@ -1,161 +1,105 @@
 # Lab 14: Helm Basics
 
-## 🎯 Öğrenme Hedefleri
-- Helm nedir anlamak
-- Chart kurulumu
-- Release yönetimi
-- Temel Helm komutları
+## 🎯 Learning Objectives
+- Understand Helm
+- Install charts
+- Manage releases
+- Basic Helm commands
 
 ---
 
-## 📖 Helm Nedir?
+## 📖 What is Helm?
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph LR
-    CHART[Helm Chart<br/>📦 Paket] --> |helm install| REL[Release<br/>🚀 Kurulum]
+    CHART[Helm Chart<br/>📦 Package] --> |helm install| REL[Release<br/>🚀 Installation]
     REL --> K8S[Kubernetes<br/>Resources]
     
     REPO[Chart Repo<br/>🗄️] --> |helm pull| CHART
 ```
 
-| Kavram | Açıklama |
-|--------|----------|
-| **Chart** | Kubernetes uygulaması paketi |
-| **Release** | Chart'ın bir kurulumu |
-| **Repository** | Chart deposu |
-| **Values** | Konfigürasyon değerleri |
+| Concept | Description |
+|---------|-------------|
+| **Chart** | Kubernetes app package |
+| **Release** | Chart installation |
+| **Repository** | Chart storage |
+| **Values** | Configuration |
 
 ---
 
-## 🔨 Kurulum Kontrolü
+## 🔨 Hands-on Exercises
 
-```bash
-# Helm versiyonu
-helm version
-
-# K3s ile helm kullanıma hazır
-# Eğer kurulu değilse:
-# curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-```
-
----
-
-## 🔨 Pratik Alıştırmalar
-
-### Alıştırma 1: Repository Ekleme
-
-**Görev:** Bitnami repository'sini ekle.
+### Exercise 1: Add Repository
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Repo ekle
 helm repo add bitnami https://charts.bitnami.com/bitnami
-
-# Repo listele
 helm repo list
-
-# Repo güncelle
 helm repo update
 ```
 </details>
 
 ---
 
-### Alıştırma 2: Chart Arama
-
-**Görev:** Nginx chart'ını ara.
+### Exercise 2: Search Charts
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Hub'da ara
 helm search hub nginx
-
-# Eklenen repo'larda ara
 helm search repo nginx
-
-# Tüm versiyonları göster
 helm search repo bitnami/nginx --versions
 ```
 </details>
 
 ---
 
-### Alıştırma 3: Chart Bilgisi
-
-**Görev:** Chart detaylarını incele.
+### Exercise 3: Chart Info
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Chart bilgisi
 helm show chart bitnami/nginx
-
-# Values (konfigürasyon seçenekleri)
 helm show values bitnami/nginx
-
-# Tüm bilgi
 helm show all bitnami/nginx
 ```
 </details>
 
 ---
 
-### Alıştırma 4: Chart Kurulumu
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant H as Helm
-    participant K as Kubernetes
-    
-    U->>H: helm install
-    H->>K: Create Resources
-    K->>H: Status
-    H->>U: Release Info
-```
-
-**Görev:** Nginx chart'ını kur.
+### Exercise 4: Install Chart
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Basit kurulum
 helm install my-nginx bitnami/nginx
 
-# Namespace belirterek
+# With namespace
 helm install my-nginx bitnami/nginx -n web --create-namespace
 
-# Dry-run (test)
+# Dry-run
 helm install my-nginx bitnami/nginx --dry-run
-```
-
-Kontrol:
-```bash
-kubectl get pods
-kubectl get svc
 ```
 </details>
 
 ---
 
-### Alıştırma 5: Custom Values
-
-**Görev:** Özel değerlerle kur.
+### Exercise 5: Custom Values
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# CLI ile value
+# CLI value
 helm install my-nginx bitnami/nginx --set replicaCount=3
 
-# Values dosyası ile
+# Values file
 cat <<EOF > my-values.yaml
 replicaCount: 2
 service:
@@ -169,105 +113,72 @@ helm install my-nginx bitnami/nginx -f my-values.yaml
 
 ---
 
-### Alıştırma 6: Release Yönetimi
+### Exercise 6: Release Management
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Release listele
 helm list
-helm list -A  # Tüm namespace'ler
-
-# Release durumu
+helm list -A
 helm status my-nginx
-
-# Release geçmişi
 helm history my-nginx
 ```
 </details>
 
 ---
 
-### Alıştırma 7: Upgrade ve Rollback
-
-**Görev:** Release'i güncelle ve geri al.
+### Exercise 7: Upgrade and Rollback
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Upgrade
 helm upgrade my-nginx bitnami/nginx --set replicaCount=5
-
-# Geçmişi gör
 helm history my-nginx
-
-# Rollback
-helm rollback my-nginx 1  # Revision 1'e dön
+helm rollback my-nginx 1
 ```
 </details>
 
 ---
 
-### Alıştırma 8: Release Silme
+### Exercise 8: Uninstall
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Sil
 helm uninstall my-nginx
-
-# Namespace ile
 helm uninstall my-nginx -n web
 ```
 </details>
 
 ---
 
-### Alıştırma 9: Template Görüntüleme
+## 📖 Helm Commands Summary
 
-**Görev:** Kurulmadan önce YAML'ları gör.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```bash
-# Template render
-helm template my-nginx bitnami/nginx
-
-# Dosyaya kaydet
-helm template my-nginx bitnami/nginx > rendered.yaml
-```
-</details>
-
----
-
-## 📖 Helm Komutları Özet
-
-| Komut | Açıklama |
-|-------|----------|
-| `helm repo add` | Repository ekle |
-| `helm repo update` | Repo güncelle |
-| `helm search repo` | Chart ara |
-| `helm show values` | Konfigürasyon seçenekleri |
-| `helm install` | Chart kur |
-| `helm upgrade` | Release güncelle |
-| `helm rollback` | Geri al |
-| `helm uninstall` | Sil |
-| `helm list` | Release listele |
-| `helm template` | YAML render |
+| Command | Description |
+|---------|-------------|
+| `helm repo add` | Add repository |
+| `helm repo update` | Update repo |
+| `helm search repo` | Search charts |
+| `helm show values` | Show config options |
+| `helm install` | Install chart |
+| `helm upgrade` | Upgrade release |
+| `helm rollback` | Rollback |
+| `helm uninstall` | Uninstall |
+| `helm list` | List releases |
+| `helm template` | Render YAML |
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-### Senaryo 1 ⭐
-> bitnami repo'sundan `redis` chart'ını `my-cache` adıyla kur.
+### Scenario 1
+> Install `redis` chart from bitnami as `my-cache`.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -277,11 +188,11 @@ helm install my-cache bitnami/redis
 
 ---
 
-### Senaryo 2 ⭐
-> `my-cache` release'ini 3 replica ile upgrade et.
+### Scenario 2
+> Upgrade `my-cache` to 3 replicas.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 helm upgrade my-cache bitnami/redis --set replica.replicaCount=3
@@ -290,23 +201,23 @@ helm upgrade my-cache bitnami/redis --set replica.replicaCount=3
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 helm uninstall my-nginx --ignore-not-found
 helm uninstall my-cache --ignore-not-found
-rm -f my-values.yaml rendered.yaml
+rm -f my-values.yaml
 ```
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Helm repository yönetimi
-- [x] Chart arama ve bilgi alma
+- [x] Helm repository management
+- [x] Chart search and info
 - [x] helm install/upgrade/rollback/uninstall
 - [x] Custom values
-- [x] Release yönetimi
+- [x] Release management
 
 ---
 

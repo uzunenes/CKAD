@@ -1,67 +1,41 @@
 # Lab 08: Liveness & Readiness Probes
 
-## 🎯 Öğrenme Hedefleri
-- Probe türlerini anlamak
-- Liveness, Readiness, Startup probes
-- HTTP, TCP, Command probe yöntemleri
+## 🎯 Learning Objectives
+- Understand probe types
+- Implement Liveness probes
+- Implement Readiness probes
+- Startup probes
 
 ---
 
-## 📖 Probe Türleri
+## 📖 Probe Types
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
-    subgraph "Liveness Probe"
-        L[Container çalışıyor mu?]
-        L --> |Başarısız| RESTART[Restart Container]
-    end
-    
-    subgraph "Readiness Probe"
-        R[Traffic almaya hazır mı?]
-        R --> |Başarısız| REMOVE[Service'den çıkar]
-    end
-    
-    subgraph "Startup Probe"
-        S[Başlatma tamamlandı mı?]
-        S --> |Başarısız| WAIT[Bekle]
+    subgraph "Probe Types"
+        LP[Liveness Probe<br/>Is it alive?] --> |Failed| RESTART[Restart Container]
+        RP[Readiness Probe<br/>Is it ready?] --> |Failed| REMOVE[Remove from Service]
+        SP[Startup Probe<br/>Has it started?] --> |Failed| WAIT[Wait/Restart]
     end
 ```
 
-| Probe | Amaç | Başarısızlıkta |
-|-------|------|----------------|
-| **Liveness** | Container sağlıklı mı? | Restart |
-| **Readiness** | Traffic alabilir mi? | Service'den çıkar |
-| **Startup** | Başlatma bitti mi? | Bekle (yavaş app'ler) |
+| Probe | Question | Action on Failure |
+|-------|----------|-------------------|
+| **Liveness** | Is the app alive? | Restart container |
+| **Readiness** | Is the app ready? | Remove from Service endpoints |
+| **Startup** | Has the app started? | Block other probes |
 
 ---
 
-## 📖 Probe Yöntemleri
+## 🔨 Hands-on Exercises
 
-```mermaid
-graph LR
-    subgraph "httpGet"
-        H[GET /health<br/>port: 8080]
-    end
-    
-    subgraph "tcpSocket"
-        T[TCP bağlantı<br/>port: 3306]
-    end
-    
-    subgraph "exec"
-        E[Command çalıştır<br/>cat /healthy]
-    end
-```
+### Exercise 1: HTTP Liveness Probe
 
----
-
-## 🔨 Pratik Alıştırmalar
-
-### Alıştırma 1: HTTP Liveness Probe
-
-**Görev:** HTTP endpoint kontrol eden liveness probe ekle.
+**Task:** Create a pod with HTTP liveness probe.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -78,24 +52,41 @@ spec:
         port: 80
       initialDelaySeconds: 5
       periodSeconds: 10
-      timeoutSeconds: 1
-      failureThreshold: 3
-```
-
-```bash
-kubectl apply -f liveness-http.yaml
-kubectl describe pod liveness-http
 ```
 </details>
 
 ---
 
-### Alıştırma 2: Command Liveness Probe
-
-**Görev:** Dosya varlığını kontrol eden probe.
+### Exercise 2: TCP Liveness Probe
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-tcp
+spec:
+  containers:
+  - name: app
+    image: redis
+    livenessProbe:
+      tcpSocket:
+        port: 6379
+      initialDelaySeconds: 5
+      periodSeconds: 10
+```
+</details>
+
+---
+
+### Exercise 3: Exec Liveness Probe
+
+**Task:** Run a command to check health.
+
+<details>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
@@ -115,56 +106,22 @@ spec:
       initialDelaySeconds: 5
       periodSeconds: 5
 ```
-
-Test - dosyayı sil ve gözlemle:
-```bash
-kubectl exec liveness-exec -- rm /tmp/healthy
-kubectl get pod liveness-exec -w  # Restart olacak
-```
 </details>
 
 ---
 
-### Alıştırma 3: TCP Probe
+### Exercise 4: Readiness Probe
 
-**Görev:** TCP port kontrolü yapan probe.
-
-<details>
-<summary>✅ Çözüm</summary>
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: tcp-probe
-spec:
-  containers:
-  - name: redis
-    image: redis
-    livenessProbe:
-      tcpSocket:
-        port: 6379
-      initialDelaySeconds: 5
-      periodSeconds: 10
-```
-</details>
-
----
-
-### Alıştırma 4: Readiness Probe
-
-**Görev:** Pod hazır olana kadar traffic almayan probe.
+**Task:** Pod only receives traffic when ready.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
   name: readiness-pod
-  labels:
-    app: web
 spec:
   containers:
   - name: app
@@ -173,135 +130,146 @@ spec:
       httpGet:
         path: /
         port: 80
-      initialDelaySeconds: 3
+      initialDelaySeconds: 5
       periodSeconds: 5
-```
-
-```bash
-kubectl apply -f readiness-pod.yaml
-kubectl get pods  # READY sütununa bak
-
-# Service oluştur
-kubectl expose pod readiness-pod --port=80
-
-# Endpoints kontrol
-kubectl get endpoints
 ```
 </details>
 
 ---
 
-### Alıştırma 5: Her İki Probe Birlikte
+### Exercise 5: Both Probes
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: probes-pod
+  name: full-probe
 spec:
   containers:
   - name: app
     image: nginx
-    ports:
-    - containerPort: 80
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 15
     readinessProbe:
+      httpGet:
+        path: /ready
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+```
+</details>
+
+---
+
+### Exercise 6: Probe Parameters
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `initialDelaySeconds` | Wait before first probe | 0 |
+| `periodSeconds` | How often to probe | 10 |
+| `timeoutSeconds` | Timeout for probe | 1 |
+| `successThreshold` | Min successes for success | 1 |
+| `failureThreshold` | Min failures for failure | 3 |
+
+---
+
+### Exercise 7: Startup Probe
+
+For slow-starting applications.
+
+<details>
+<summary>✅ Solution</summary>
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: slow-start
+spec:
+  containers:
+  - name: app
+    image: nginx
+    startupProbe:
       httpGet:
         path: /
         port: 80
-      initialDelaySeconds: 3
-      periodSeconds: 5
+      failureThreshold: 30
+      periodSeconds: 10
     livenessProbe:
       httpGet:
         path: /
         port: 80
-      initialDelaySeconds: 10
       periodSeconds: 10
 ```
 </details>
 
 ---
 
-### Probe Parametreleri
+## 🎯 Exam Practice
 
-| Parametre | Açıklama | Varsayılan |
-|-----------|----------|------------|
-| `initialDelaySeconds` | İlk kontrol öncesi bekleme | 0 |
-| `periodSeconds` | Kontrol aralığı | 10 |
-| `timeoutSeconds` | Timeout | 1 |
-| `successThreshold` | Kaç başarı gerekli | 1 |
-| `failureThreshold` | Kaç başarısızlık | 3 |
-
----
-
-## 🎯 Sınav Pratiği
-
-### Senaryo 1
-> `webapp` pod oluştur (nginx). Liveness: HTTP GET `/`, port 80, 15s delay.
+### Scenario 1
+> Create a pod `web-health` with HTTP liveness probe on port 80, path `/health`.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: webapp
+  name: web-health
 spec:
   containers:
-  - name: nginx
+  - name: web
     image: nginx
     livenessProbe:
       httpGet:
-        path: /
+        path: /health
         port: 80
-      initialDelaySeconds: 15
 ```
 </details>
 
 ---
 
-### Senaryo 2
-> `api-pod` oluştur. Readiness probe: TCP port 8080 kontrolü.
+### Scenario 2
+> Add readiness probe to existing pod checking TCP port 3306.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: api-pod
-spec:
-  containers:
-  - name: api
-    image: nginx
-    readinessProbe:
-      tcpSocket:
-        port: 80
-      initialDelaySeconds: 5
+readinessProbe:
+  tcpSocket:
+    port: 3306
+  initialDelaySeconds: 5
+  periodSeconds: 10
 ```
 </details>
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
-kubectl delete pod --all
+kubectl delete pod liveness-http liveness-tcp liveness-exec readiness-pod full-probe slow-start web-health --ignore-not-found
 ```
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Liveness vs Readiness farkı
-- [x] httpGet, tcpSocket, exec yöntemleri
-- [x] Probe parametreleri
-- [x] Probe davranışları
+- [x] Liveness vs Readiness vs Startup probes
+- [x] HTTP, TCP, and Exec probe types
+- [x] Probe parameters
+- [x] When to use each probe type
 
 ---
 
-[⬅️ Lab 07](lab-07-jobs-cronjobs.md) | [Lab 09: Resources ➡️](lab-09-resource-limits.md)
+[⬅️ Lab 07](lab-07-jobs-cronjobs.md) | [Lab 09: Resource Limits ➡️](lab-09-resource-limits.md)
