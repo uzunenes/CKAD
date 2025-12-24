@@ -1,4 +1,4 @@
-# 🎯 CKAD Pratik Lablar
+# 🎯 CKAD Practice Labs
 
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
 ![K3s](https://img.shields.io/badge/K3s-FFC61C?style=for-the-badge&logo=k3s&logoColor=black)
@@ -6,61 +6,61 @@
 ![Labs](https://img.shields.io/badge/Labs-17-blue?style=for-the-badge)
 ![Exercises](https://img.shields.io/badge/Exercises-100+-orange?style=for-the-badge)
 
-**Certified Kubernetes Application Developer (CKAD)** sınavına hazırlık için uygulamalı laboratuvar çalışmaları.
+Hands-on lab exercises to prepare for the **Certified Kubernetes Application Developer (CKAD)** exam.
 
-> 🖥️ Bu lablar **k3s** ortamı için optimize edilmiştir.
-
----
-
-## 🆕 Yeni Başlayanlar Buradan!
-
-Kubernetes'e yeni misin? Önce felsefeyi anla:
-
-### 📖 [Kubernetes Öğrenme Rehberi](docs/00-giris.md)
-- Kubernetes nedir ve neden gerekli?
-- Temel kavramlar ve mimari
-- K3s kurulumu
-- Öğrenme yolu
+> 🖥️ These labs are optimized for **k3s** environment.
 
 ---
 
-## 📊 CKAD Sınav Bilgileri
+## 🆕 New to Kubernetes?
 
-| Özellik | Değer |
-|---------|-------|
-| ⏱️ Süre | 2 saat |
-| 📝 Soru Sayısı | ~15-20 |
-| 🎯 Geçme Notu | %66 |
+Start with the basics:
+
+### 📖 [Kubernetes Learning Guide](docs/00-intro.md)
+- What is Kubernetes and why do you need it?
+- Core concepts and architecture
+- K3s setup
+- Learning path
+
+---
+
+## 📊 CKAD Exam Info
+
+| Property | Value |
+|----------|-------|
+| ⏱️ Duration | 2 hours |
+| 📝 Questions | ~15-20 |
+| 🎯 Passing Score | 66% |
 | 💻 Format | Hands-on (Terminal) |
-| 📚 Kaynak | kubernetes.io erişimi VAR |
-| 🔄 K8s Versiyonu | v1.30+ |
+| 📚 Resources | kubernetes.io access ALLOWED |
+| 🔄 K8s Version | v1.30+ |
 
 ---
 
-## �️ Büyük Resim: Ne Öğreneceksin?
+## 🗺️ The Big Picture: What You'll Learn
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1f6feb', 'primaryTextColor': '#fff', 'primaryBorderColor': '#388bfd', 'lineColor': '#8b949e', 'secondaryColor': '#21262d', 'tertiaryColor': '#161b22'}}}%%
 graph TB
-    subgraph "1️⃣ Temel (Hafta 1)"
+    subgraph "1️⃣ Basics (Week 1)"
         POD[Pod] --> MULTI[Multi-Container]
         MULTI --> DEP[Deployment]
         DEP --> SVC[Service]
     end
     
-    subgraph "2️⃣ Konfigürasyon (Hafta 2)"
+    subgraph "2️⃣ Configuration (Week 2)"
         CM[ConfigMap] --> SEC[Secret]
         SEC --> VOL[Volume]
         VOL --> RES[Resources]
     end
     
-    subgraph "3️⃣ İleri (Hafta 3)"
+    subgraph "3️⃣ Advanced (Week 3)"
         JOB[Jobs] --> PROBE[Probes]
         PROBE --> SECCTX[Security]
         SECCTX --> NP[NetworkPolicy]
     end
     
-    subgraph "4️⃣ Tools (Hafta 4)"
+    subgraph "4️⃣ Tools (Week 4)"
         ING[Ingress] --> DEBUG[Debugging]
         DEBUG --> HELM[Helm]
         HELM --> KUS[Kustomize]
@@ -73,38 +73,38 @@ graph TB
 
 ---
 
-## 📋 Lab Listesi (17 Lab, 100+ Alıştırma)
+## 📋 Lab List (17 Labs, 100+ Exercises)
 
-### 🟢 Hafta 1: Temel Kavramlar
+### 🟢 Week 1: Core Concepts
 
-| # | Lab | Konu | Öğreneceklerin |
-|---|-----|------|----------------|
-| 01 | [Pod Temelleri](labs/lab-01-pod-basics.md) | Pod | Container çalıştırma, log, exec |
-| 02 | [Multi-Container](labs/lab-02-multi-container-pods.md) | Sidecar, Init | Birden fazla container |
-| 03 | [Deployments](labs/lab-03-deployments.md) | Deployment | Scaling, rolling update |
+| # | Lab | Topic | What You'll Learn |
+|---|-----|-------|-------------------|
+| 01 | [Pod Basics](labs/lab-01-pod-basics.md) | Pod | Run containers, logs, exec |
+| 02 | [Multi-Container](labs/lab-02-multi-container-pods.md) | Sidecar, Init | Multiple containers in a pod |
+| 03 | [Deployments](labs/lab-03-deployments.md) | Deployment | Scaling, rolling updates |
 | 04 | [Services](labs/lab-04-services.md) | Service | ClusterIP, NodePort |
 
-### 🟡 Hafta 2: Konfigürasyon
+### 🟡 Week 2: Configuration
 
-| # | Lab | Konu | Öğreneceklerin |
-|---|-----|------|----------------|
-| 05 | [ConfigMaps & Secrets](labs/lab-05-configmaps-secrets.md) | Config | Env vars, dosya mount |
+| # | Lab | Topic | What You'll Learn |
+|---|-----|-------|-------------------|
+| 05 | [ConfigMaps & Secrets](labs/lab-05-configmaps-secrets.md) | Config | Env vars, volume mounts |
 | 06 | [Volumes](labs/lab-06-volumes.md) | Storage | emptyDir, PV/PVC |
 | 09 | [Resources](labs/lab-09-resource-limits.md) | Limits | CPU/Memory, Quota |
 
-### 🟠 Hafta 3: İleri Konular
+### 🟠 Week 3: Advanced Topics
 
-| # | Lab | Konu | Öğreneceklerin |
-|---|-----|------|----------------|
-| 07 | [Jobs & CronJobs](labs/lab-07-jobs-cronjobs.md) | Batch | Tek seferlik ve zamanlanmış işler |
+| # | Lab | Topic | What You'll Learn |
+|---|-----|-------|-------------------|
+| 07 | [Jobs & CronJobs](labs/lab-07-jobs-cronjobs.md) | Batch | One-time and scheduled jobs |
 | 08 | [Probes](labs/lab-08-probes.md) | Health | Liveness, Readiness |
 | 11 | [Security](labs/lab-11-security.md) | Security | SecurityContext, SA |
-| 10 | [Network Policies](labs/lab-10-network-policies.md) | Network | Firewall kuralları |
+| 10 | [Network Policies](labs/lab-10-network-policies.md) | Network | Firewall rules |
 
-### 🔴 Hafta 4: Deployment & Tooling
+### 🔴 Week 4: Deployment & Tooling
 
-| # | Lab | Konu | Öğreneceklerin |
-|---|-----|------|----------------|
+| # | Lab | Topic | What You'll Learn |
+|---|-----|-------|-------------------|
 | 12 | [Ingress](labs/lab-12-ingress.md) | HTTP | Path/Host routing |
 | 13 | [Debugging](labs/lab-13-debugging.md) | Debug | Troubleshooting |
 | 14 | [Helm](labs/lab-14-helm.md) | Packaging | Chart install, upgrade |
@@ -114,20 +114,19 @@ graph TB
 
 ---
 
-## 🚀 Hızlı Başlangıç
+## 🚀 Quick Start
 
-### 1. K3s Kontrol
+### 1. Check K3s
 ```bash
 kubectl get nodes
 ```
 
-### 2. İlk Lab'a Başla
+### 2. Start First Lab
 ```bash
-# Lab 01'i aç
 cat labs/lab-01-pod-basics.md
 ```
 
-### 3. Alias'ları Ayarla (Opsiyonel)
+### 3. Set Up Aliases (Optional)
 ```bash
 echo 'alias k=kubectl' >> ~/.bashrc
 echo 'export do="--dry-run=client -o yaml"' >> ~/.bashrc
@@ -136,83 +135,83 @@ source ~/.bashrc
 
 ---
 
-## 💡 Her Lab'ın Yapısı
+## 💡 Each Lab Structure
 
 ```
-📖 Teori & Neden Önemli?
-     ├── Mermaid diyagramı
-     └── Gerçek dünya örneği
+📖 Theory & Why It Matters
+     ├── Mermaid diagram
+     └── Real-world example
 
-🔨 Pratik Alıştırmalar (8-10 adet)
-     ├── Görev açıklaması
-     ├── 💡 İpucu (dropdown)
-     └── ✅ Çözüm (dropdown)
+🔨 Hands-on Exercises (8-10 each)
+     ├── Task description
+     ├── 💡 Hint (dropdown)
+     └── ✅ Solution (dropdown)
 
-🎯 Sınav Pratiği (2-3 senaryo)
-     └── Timer ile çöz!
+🎯 Exam Practice (2-3 scenarios)
+     └── Time yourself!
 
-🧹 Temizlik
-     └── Kaynakları sil
+🧹 Cleanup
+     └── Delete resources
 
-✅ Öğrendiklerimiz
+✅ What We Learned
      └── Checklist
 ```
 
 ---
 
-## 📚 Ek Kaynaklar
+## 📚 Additional Resources
 
-### Resmi
-- [📖 Kubernetes Docs](https://kubernetes.io/docs/) - Sınavda erişim VAR
+### Official
+- [📖 Kubernetes Docs](https://kubernetes.io/docs/) - Accessible during exam!
 - [📋 kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 - [📜 CKAD Curriculum](https://github.com/cncf/curriculum)
 
-### Pratik
-- [🧪 Killer Shell](https://killer.sh/ckad) - Gerçek sınav simülasyonu
-- [🎮 KillerCoda](https://killercoda.com/ckad) - Ücretsiz senaryolar
+### Practice
+- [🧪 Killer Shell](https://killer.sh/ckad) - Real exam simulator
+- [🎮 KillerCoda](https://killercoda.com/ckad) - Free scenarios
 - [🎯 CKAD Exercises](https://github.com/dgkanatsios/CKAD-exercises)
 
 ---
 
-## 📊 Repo İstatistikleri
+## 📊 Repository Stats
 
-| Metrik | Değer |
+| Metric | Value |
 |--------|-------|
-| 📚 Toplam Lab | 17 |
-| 📝 Alıştırma | 100+ |
-| 🎯 Sınav Senaryosu | 35+ |
-| 📊 Mermaid Diyagram | 30+ |
-| 📋 Müfredat Kapsama | %100 |
+| 📚 Total Labs | 17 |
+| 📝 Exercises | 100+ |
+| 🎯 Exam Scenarios | 35+ |
+| 📊 Mermaid Diagrams | 30+ |
+| 📋 Curriculum Coverage | 100% |
 
 ---
 
-## 🎯 Sınav Günü Cheatsheet
+## 🎯 Exam Day Cheatsheet
 
 ```bash
-# Alias'lar
+# Aliases
 alias k=kubectl
 export do="--dry-run=client -o yaml"
 export now="--force --grace-period=0"
 
-# En sık kullanılan komutlar
+# Most used commands
 k run nginx --image=nginx $do > pod.yaml
 k create deploy web --image=nginx --replicas=3
 k expose deploy web --port=80
 k create cm myconfig --from-literal=key=value
 k create secret generic mysecret --from-literal=pass=123
 
-# Hızlı silme
+# Quick delete
 k delete pod nginx $now
 ```
 
 ---
 
-⭐ **Bu repo işinize yaradıysa star vermeyi unutmayın!**
+⭐ **If this repo helped you, please give it a star!**
 
-📝 **Katkı:** Pull request'ler kabul edilir!
+📝 **Contributing:** Pull requests are welcome!
 
-🐛 **Hata:** Issue açabilirsiniz.
+🐛 **Bugs:** Feel free to open an issue.
 
 ---
 
-[📖 Başlamadan Önce: Kubernetes Rehberi](docs/00-giris.md) | [🚀 Lab 01: Pod Temelleri](labs/lab-01-pod-basics.md)
+[📖 Before You Start: Kubernetes Guide](docs/00-intro.md) | [🚀 Lab 01: Pod Basics](labs/lab-01-pod-basics.md)

@@ -310,4 +310,4 @@ rm -f my-values.yaml rendered.yaml
 
 ---
 
-[⬅️ Lab 13](lab-13-debugging.md) | [🏠 Ana Sayfa](../README.md)
+[⬅️ Lab 13](lab-13-debugging.md) | [Lab 15: Deployment Strategies ➡️](lab-15-deployment-strategies.md)

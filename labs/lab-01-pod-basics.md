@@ -1,75 +1,77 @@
-# Lab 01: Pod Temelleri
+# Lab 01: Pod Basics
 
-## 🎯 Öğrenme Hedefleri
-- Pod nedir anlamak
-- Pod oluşturmak (imperative ve declarative)
-- Pod'ları listelemek ve incelemek
-- Pod silmek
+## 🎯 Learning Objectives
+- Understand what a Pod is
+- Create Pods (imperative and declarative)
+- List and inspect Pods
+- Delete Pods
 
 ---
 
-## 📖 Pod Nedir?
+## 📖 What is a Pod?
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph TB
     subgraph "Kubernetes Cluster"
-        subgraph "Node (Sunucu)"
+        subgraph "Node (Server)"
             subgraph "Pod"
                 C1[Container<br/>nginx]
                 C2[Container<br/>sidecar]
-                V1[(Volume<br/>Paylaşılan Disk)]
+                V1[(Volume<br/>Shared Disk)]
             end
         end
     end
     
-    USER[👤 Kullanıcı] -->|HTTP İsteği| Pod
+    USER[👤 User] -->|HTTP Request| Pod
     C1 <--> V1
     C2 <--> V1
     C1 <-->|localhost| C2
 ```
 
-### 🤔 Pod Neden Önemli?
+### 🤔 Why is Pod Important?
 
-**Pod**, Kubernetes'in en temel yapı taşıdır. Docker'da "container" ne ise, Kubernetes'te "Pod" odur.
+A **Pod** is the fundamental building block of Kubernetes. What a "container" is in Docker, a "Pod" is in Kubernetes.
 
-| Kavram | Docker | Kubernetes |
-|--------|--------|------------|
-| En küçük birim | Container | Pod |
-| Çalıştırma | `docker run` | `kubectl run` |
-| Ağ | Container network | Pod network |
+| Concept | Docker | Kubernetes |
+|---------|--------|------------|
+| Smallest unit | Container | Pod |
+| Run command | `docker run` | `kubectl run` |
+| Network | Container network | Pod network |
 
-### 💡 Gerçek Dünya Örneği
+### 💡 Real-World Example
 
-Bir web sitesi düşünün:
-- **Container 1:** Web sunucusu (nginx)
-- **Container 2:** Log toplayıcı (fluentd)
-- **Shared Volume:** Log dosyaları
+Think of a website:
+- **Container 1:** Web server (nginx)
+- **Container 2:** Log collector (fluentd)
+- **Shared Volume:** Log files
 
-Bu ikisi aynı Pod içinde çalışır çünkü:
-- Aynı yaşam döngüsüne sahipler
-- Birbirleriyle sıkı iletişim halindeler
-- Aynı veriyi paylaşıyorlar
+These run in the same Pod because:
+- They share the same lifecycle
+- They communicate closely
+- They share data
 
-### 🔑 Pod'un Temel Özellikleri
+### 🔑 Key Pod Properties
 
-| Özellik | Açıklama |
-|---------|----------|
-| **IP Adresi** | Her Pod'un kendine özel cluster IP'si var |
-| **Paylaşımlı Ağ** | Pod içindeki container'lar `localhost` ile konuşur |
-| **Geçici (Ephemeral)** | Pod ölürse, aynı Pod geri gelmez (yeni Pod oluşur) |
-| **Tek Kullanımlık** | Pod'ları doğrudan oluşturma, Deployment kullan! |
+| Property | Description |
+|----------|-------------|
+| **IP Address** | Each Pod gets its own cluster IP |
+| **Shared Network** | Containers in a Pod talk via `localhost` |
+| **Ephemeral** | If a Pod dies, a new one is created (not the same one) |
+| **Disposable** | Don't create Pods directly, use Deployment! |
 
 ---
 
-## 🗺️ Büyük Resim: Pod Nerede Duruyor?
+## 🗺️ Big Picture: Where Does Pod Fit?
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph LR
-    subgraph "Kullanıcı Oluşturur"
+    subgraph "You Create"
         DEP[Deployment]
     end
     
-    subgraph "Kubernetes Yönetir"
+    subgraph "Kubernetes Manages"
         RS[ReplicaSet]
         POD1[Pod 1]
         POD2[Pod 2]
@@ -83,40 +85,40 @@ graph LR
     style POD2 fill:#f96
 ```
 
-> ⚠️ **Önemli:** Gerçek dünyada Pod'ları direkt oluşturmayız! Deployment kullanırız (Lab 03). Ama Pod'u anlamadan Deployment anlayamayız.
+> ⚠️ **Important:** In the real world, we don't create Pods directly! We use Deployments (Lab 03). But you can't understand Deployments without understanding Pods.
 
 ---
 
-## 🔨 Pratik Alıştırmalar
+## 🔨 Hands-on Exercises
 
-### Alıştırma 1: İlk Pod'unu Oluştur
+### Exercise 1: Create Your First Pod
 
-**Görev:** `nginx` image kullanan `my-first-pod` adında bir pod oluştur.
+**Task:** Create a pod named `my-first-pod` using the `nginx` image.
 
-**Bu ne işe yarar?** Bir web sunucusu başlatıyoruz. nginx, internette en çok kullanılan web sunucularından biri.
+**What does this do?** We're starting a web server. nginx is one of the most popular web servers.
 
 <details>
-<summary>💡 İpucu</summary>
+<summary>💡 Hint</summary>
 
 ```bash
-kubectl run <pod-adı> --image=<image-adı>
+kubectl run <pod-name> --image=<image-name>
 ```
 </details>
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl run my-first-pod --image=nginx
 ```
 
-**Ne oldu?**
-1. Kubernetes, nginx image'ını Docker Hub'dan çekti
-2. Bir container oluşturdu
-3. Bu container'ı bir Pod içine koydu
-4. Pod'u bir Node'a yerleştirdi (schedule)
+**What happened?**
+1. Kubernetes pulled the nginx image from Docker Hub
+2. Created a container
+3. Put the container in a Pod
+4. Scheduled the Pod on a Node
 
-Kontrol:
+Check:
 ```bash
 kubectl get pods
 ```
@@ -124,232 +126,232 @@ kubectl get pods
 
 ---
 
-### Alıştırma 2: Pod Durumunu İzle
+### Exercise 2: Watch Pod Status
 
-**Görev:** Pod'un `Running` durumuna geçmesini izle.
+**Task:** Watch the Pod transition to `Running` state.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Watch modunda izle (Ctrl+C ile çık)
+# Watch mode (Ctrl+C to exit)
 kubectl get pods -w
 ```
 
-**Pod Durumları (Lifecycle):**
+**Pod States (Lifecycle):**
 ```
 Pending → ContainerCreating → Running
    ↓              ↓              ↓
- Sıraya     Image         Çalışıyor!
- alındı     çekiliyor
+Queued       Image is       Working!
+             being pulled
 ```
 
-Eğer hata varsa:
-- `ImagePullBackOff` → Image adı yanlış
-- `CrashLoopBackOff` → Container sürekli çöküyor
-- `Error` → Bir şeyler yanlış
+If there's an error:
+- `ImagePullBackOff` → Wrong image name
+- `CrashLoopBackOff` → Container keeps crashing
+- `Error` → Something is wrong
 
 </details>
 
 ---
 
-### Alıştırma 3: Pod Detaylarını İncele
+### Exercise 3: Inspect Pod Details
 
-**Görev:** `my-first-pod` hakkında detaylı bilgi al.
+**Task:** Get detailed information about `my-first-pod`.
 
-**Bu ne işe yarar?** Hata ayıklama (debugging) için en önemli komut!
+**What's this for?** This is the most important command for debugging!
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl describe pod my-first-pod
 ```
 
-**Bakılacak önemli bölümler:**
+**Important sections to look at:**
 
-| Bölüm | Açıklama |
-|-------|----------|
-| **Node** | Pod hangi sunucuda çalışıyor |
-| **IP** | Pod'un cluster içi IP adresi |
-| **Containers** | Container durumu ve restart sayısı |
-| **Events** | Son olaylar (hata bulmak için!) |
+| Section | Description |
+|---------|-------------|
+| **Node** | Which server is the Pod running on |
+| **IP** | Pod's cluster-internal IP address |
+| **Containers** | Container status and restart count |
+| **Events** | Recent events (for finding errors!) |
 
 </details>
 
 ---
 
-### Alıştırma 4: YAML ile Pod Oluştur
+### Exercise 4: Create Pod with YAML
 
-**Görev:** Aşağıdaki özelliklere sahip bir pod YAML dosyası oluştur:
-- İsim: `redis-pod`
+**Task:** Create a pod YAML file with these specs:
+- Name: `redis-pod`
 - Image: `redis:alpine`
 - Label: `app=cache`
 
-**Bu ne işe yarar?** YAML = Infrastructure as Code. Tüm ayarları dosyada tutarsın, versiyon kontrolü yapabilirsin.
+**What's this for?** YAML = Infrastructure as Code. Keep all settings in a file, use version control.
 
 <details>
-<summary>💡 İpucu - Sınav Hilesi!</summary>
+<summary>💡 Hint - Exam Trick!</summary>
 
-YAML ezberlemene gerek yok! Kubernetes sana template verir:
+You don't need to memorize YAML! Kubernetes gives you a template:
 
 ```bash
 kubectl run redis-pod --image=redis:alpine --labels=app=cache --dry-run=client -o yaml
 ```
 
-`--dry-run=client` → Gerçekten oluşturma, sadece YAML göster
-`-o yaml` → Çıktıyı YAML formatında ver
+`--dry-run=client` → Don't actually create, just show YAML
+`-o yaml` → Output in YAML format
 </details>
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# 1. YAML şablonu oluştur
+# 1. Generate YAML template
 kubectl run redis-pod --image=redis:alpine --labels=app=cache --dry-run=client -o yaml > redis-pod.yaml
 
-# 2. Dosyayı incele
+# 2. Inspect the file
 cat redis-pod.yaml
 
-# 3. Uygula
+# 3. Apply
 kubectl apply -f redis-pod.yaml
 ```
 
-**YAML Açıklaması:**
+**YAML Explained:**
 ```yaml
-apiVersion: v1          # API versiyonu
-kind: Pod                # Kaynak türü
+apiVersion: v1          # API version
+kind: Pod               # Resource type
 metadata:
-  name: redis-pod        # Pod'un adı
+  name: redis-pod       # Pod name
   labels:
-    app: cache           # Etiket (filtreleme için)
+    app: cache          # Label (for filtering)
 spec:
   containers:
-  - name: redis          # Container adı
-    image: redis:alpine  # Kullanılacak image
+  - name: redis         # Container name
+    image: redis:alpine # Image to use
 ```
 </details>
 
 ---
 
-### Alıştırma 5: Pod Loglarını Gör
+### Exercise 5: View Pod Logs
 
-**Görev:** `my-first-pod` loglarını görüntüle.
+**Task:** View logs from `my-first-pod`.
 
-**Bu ne işe yarar?** Container içinde ne oluyor? Hata var mı? Log'lar söyler.
+**What's this for?** What's happening inside the container? Any errors? Logs will tell you.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Mevcut loglar
+# Current logs
 kubectl logs my-first-pod
 
-# Canlı takip (Ctrl+C ile çık)
+# Follow logs live (Ctrl+C to exit)
 kubectl logs -f my-first-pod
 
-# Son 10 satır
+# Last 10 lines
 kubectl logs --tail=10 my-first-pod
 
-# Önceki (crash olmuş) container logu
+# Previous (crashed) container logs
 kubectl logs my-first-pod --previous
 ```
 </details>
 
 ---
 
-### Alıştırma 6: Pod İçine Gir
+### Exercise 6: Execute Commands in Pod
 
-**Görev:** `my-first-pod` içine shell aç ve `hostname` komutunu çalıştır.
+**Task:** Open a shell in `my-first-pod` and run `hostname`.
 
-**Bu ne işe yarar?** Container içinde debug yapmak, dosyaları kontrol etmek, network test etmek için.
+**What's this for?** Debug inside the container, check files, test network.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Tek komut çalıştır
+# Run a single command
 kubectl exec my-first-pod -- hostname
 
-# Interactive shell aç
+# Open interactive shell
 kubectl exec -it my-first-pod -- /bin/sh
 
-# İçerideyken örnek komutlar:
+# Commands to try inside:
 # ls -la
 # cat /etc/nginx/nginx.conf
 # curl localhost:80
 # exit
 ```
 
-**-it ne demek?**
-- `-i` = interactive (stdin açık)
+**What does -it mean?**
+- `-i` = interactive (stdin open)
 - `-t` = TTY (terminal)
 </details>
 
 ---
 
-### Alıştırma 7: Label ile Filtreleme
+### Exercise 7: Filter with Labels
 
-**Görev:** `app=cache` label'ına sahip pod'ları listele.
+**Task:** List pods with label `app=cache`.
 
-**Bu ne işe yarar?** Label'lar Kubernetes'in "arama motoru". Binlerce pod içinden istediğini bul!
+**What's this for?** Labels are Kubernetes' "search engine". Find what you want among thousands of pods!
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Label ile filtrele
+# Filter by label
 kubectl get pods -l app=cache
 
-# Tüm label'ları göster
+# Show all labels
 kubectl get pods --show-labels
 
-# Label ekle
+# Add a label
 kubectl label pod my-first-pod env=dev
 
-# Label sil (- işareti)
+# Remove a label (- at the end)
 kubectl label pod my-first-pod env-
 ```
 </details>
 
 ---
 
-### Alıştırma 8: Pod Sil
+### Exercise 8: Delete Pods
 
-**Görev:** Oluşturduğun pod'ları sil.
+**Task:** Delete the pods you created.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
-# Tek pod sil
+# Delete single pod
 kubectl delete pod my-first-pod
 
-# YAML ile sil (ne oluşturduysan onu siler)
+# Delete using YAML (deletes what you created)
 kubectl delete -f redis-pod.yaml
 
-# Label ile sil
+# Delete by label
 kubectl delete pods -l app=cache
 
-# Hepsini sil (DİKKAT!)
+# Delete all (CAREFUL!)
 kubectl delete pods --all
 
-# Hızlı silme (sınav için)
+# Quick delete (for exam)
 kubectl delete pod my-first-pod --force --grace-period=0
 ```
 </details>
 
 ---
 
-## 🎯 Sınav Pratiği
+## 🎯 Exam Practice
 
-Aşağıdaki senaryoları timer ile çöz! Hedef: Her biri < 2 dakika
+Solve these scenarios with a timer! Target: < 2 minutes each
 
-### Senaryo 1
-> `busybox` image kullanan `test-pod` adında bir pod oluştur. Pod, `sleep 3600` komutunu çalıştırmalı.
+### Scenario 1
+> Create a pod named `test-pod` using `busybox` image. The pod should run `sleep 3600` command.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl run test-pod --image=busybox --command -- sleep 3600
@@ -358,11 +360,11 @@ kubectl run test-pod --image=busybox --command -- sleep 3600
 
 ---
 
-### Senaryo 2
-> `webapp` adında, `nginx:1.21` image kullanan ve `tier=frontend` label'ına sahip bir pod oluştur.
+### Scenario 2
+> Create a pod named `webapp` using `nginx:1.21` image with label `tier=frontend`.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl run webapp --image=nginx:1.21 --labels=tier=frontend
@@ -371,33 +373,33 @@ kubectl run webapp --image=nginx:1.21 --labels=tier=frontend
 
 ---
 
-### Senaryo 3
-> Mevcut `webapp` pod'unun hangi node'da çalıştığını bul.
+### Scenario 3
+> Find which node the `webapp` pod is running on.
 
 <details>
-<summary>✅ Çözüm</summary>
+<summary>✅ Solution</summary>
 
 ```bash
 kubectl get pod webapp -o wide
-# veya
+# or
 kubectl describe pod webapp | grep Node
 ```
 </details>
 
 ---
 
-## ❌ Sık Yapılan Hatalar
+## ❌ Common Mistakes
 
-| Hata | Belirti | Çözüm |
-|------|---------|-------|
-| Image adı yanlış | `ImagePullBackOff` | Image adını kontrol et |
-| Command yanlış | `CrashLoopBackOff` | `kubectl logs` ile bak |
-| Port çakışması | `Error` | Farklı port kullan |
-| YAML syntax hatası | `error parsing` | YAML girintileri kontrol et |
+| Error | Symptom | Solution |
+|-------|---------|----------|
+| Wrong image name | `ImagePullBackOff` | Check image name |
+| Wrong command | `CrashLoopBackOff` | Check with `kubectl logs` |
+| Port conflict | `Error` | Use different port |
+| YAML syntax error | `error parsing` | Check YAML indentation |
 
 ---
 
-## 🧹 Temizlik
+## 🧹 Cleanup
 
 ```bash
 kubectl delete pod --all
@@ -406,27 +408,27 @@ rm -f redis-pod.yaml
 
 ---
 
-## ✅ Öğrendiklerimiz
+## ✅ What We Learned
 
-- [x] Pod = Kubernetes'in en küçük birimi
-- [x] `kubectl run` ile pod oluşturma
-- [x] `kubectl get pods` ile listeleme
-- [x] `kubectl describe` ile detay görme
-- [x] `kubectl logs` ile log okuma
-- [x] `kubectl exec` ile pod içinde komut çalıştırma
-- [x] `--dry-run=client -o yaml` ile YAML oluşturma (sınav hilesi!)
-- [x] Label ile filtreleme
-
----
-
-## 🔗 Sonraki Adım
-
-Pod'ları anladın. Ama tek bir Pod yeterli mi? Ya Pod ölürse?
-
-➡️ [Lab 02: Multi-Container Pods](lab-02-multi-container-pods.md) - Bir Pod'a birden fazla container koy
-
-➡️ [Lab 03: Deployments](lab-03-deployments.md) - Pod'ları otomatik yönet, ölürse yeniden oluştur
+- [x] Pod = Kubernetes' smallest unit
+- [x] `kubectl run` to create pods
+- [x] `kubectl get pods` to list
+- [x] `kubectl describe` for details
+- [x] `kubectl logs` for logs
+- [x] `kubectl exec` to run commands inside
+- [x] `--dry-run=client -o yaml` for YAML generation (exam trick!)
+- [x] Label filtering
 
 ---
 
-[⬅️ Ana Sayfa](../README.md) | [Lab 02: Multi-Container Pods ➡️](lab-02-multi-container-pods.md)
+## 🔗 Next Steps
+
+You understand Pods. But is a single Pod enough? What if the Pod dies?
+
+➡️ [Lab 02: Multi-Container Pods](lab-02-multi-container-pods.md) - Put multiple containers in a Pod
+
+➡️ [Lab 03: Deployments](lab-03-deployments.md) - Manage Pods automatically, recreate if they die
+
+---
+
+[⬅️ Home](../README.md) | [Lab 02: Multi-Container Pods ➡️](lab-02-multi-container-pods.md)
