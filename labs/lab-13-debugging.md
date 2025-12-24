@@ -43,7 +43,7 @@ flowchart TD
 
 ### Exercise 2: kubectl describe
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -59,7 +59,7 @@ kubectl describe pod broken
 
 ### Exercise 3: kubectl logs
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -84,7 +84,7 @@ kubectl logs <pod> -c <container>
 
 ### Exercise 4: kubectl exec
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -104,7 +104,7 @@ kubectl exec <pod> -- nslookup kubernetes
 
 ### Exercise 5: Events
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -123,7 +123,7 @@ kubectl get events --field-selector involvedObject.name=<pod>
 
 ### Exercise 6: Network Debugging
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -183,7 +183,7 @@ kubectl describe pod <pod>
 ### Scenario 1
 > `web-pod` is running but webpage not loading. Debug it.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash

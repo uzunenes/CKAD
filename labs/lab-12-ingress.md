@@ -45,7 +45,7 @@ kubectl expose deployment app2 --port=80
 
 **Task:** Create path-based routing.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -78,7 +78,7 @@ spec:
 
 ### Exercise 2: Host-Based Routing
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -129,7 +129,7 @@ curl -H "Host: app1.local" http://<NODE_IP>
 
 ### Exercise 4: Default Backend
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -160,7 +160,7 @@ spec:
 
 ### Exercise 5: TLS Ingress
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 Create TLS secret:
@@ -203,7 +203,7 @@ spec:
 ### Scenario 1
 > Create Ingress for path `/web` routing to `webapp` service on port 80.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml

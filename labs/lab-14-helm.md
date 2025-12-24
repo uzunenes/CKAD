@@ -32,7 +32,7 @@ graph LR
 
 ### Exercise 1: Add Repository
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -46,7 +46,7 @@ helm repo update
 
 ### Exercise 2: Search Charts
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -60,7 +60,7 @@ helm search repo bitnami/nginx --versions
 
 ### Exercise 3: Chart Info
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -74,7 +74,7 @@ helm show all bitnami/nginx
 
 ### Exercise 4: Install Chart
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -92,7 +92,7 @@ helm install my-nginx bitnami/nginx --dry-run
 
 ### Exercise 5: Custom Values
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -115,7 +115,7 @@ helm install my-nginx bitnami/nginx -f my-values.yaml
 
 ### Exercise 6: Release Management
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -130,7 +130,7 @@ helm history my-nginx
 
 ### Exercise 7: Upgrade and Rollback
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -144,7 +144,7 @@ helm rollback my-nginx 1
 
 ### Exercise 8: Uninstall
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -177,7 +177,7 @@ helm uninstall my-nginx -n web
 ### Scenario 1
 > Install `redis` chart from bitnami as `my-cache`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -191,7 +191,7 @@ helm install my-cache bitnami/redis
 ### Scenario 2
 > Upgrade `my-cache` to 3 replicas.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash

@@ -48,7 +48,7 @@ kubectl create deployment web --image=nginx --replicas=3
 
 **Task:** Expose `web` deployment with ClusterIP service.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -69,7 +69,7 @@ kubectl get endpoints web
 
 **Task:** Create a NodePort service for `web` deployment.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -89,7 +89,7 @@ curl http://<NODE_IP>:<NODE_PORT>
 
 ### Exercise 4: Service YAML
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -121,7 +121,7 @@ graph LR
     POD -->|"web.default.svc.cluster.local"| SVC
 ```
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -140,7 +140,7 @@ kubectl run test-dns --image=busybox --rm -it --restart=Never -- nslookup web
 
 **Task:** View service endpoints.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -157,7 +157,7 @@ kubectl get endpoints web
 
 K3s has built-in LoadBalancer support (ServiceLB).
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -174,7 +174,7 @@ kubectl get svc web-lb
 
 **Task:** Create a service with multiple ports.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -202,7 +202,7 @@ spec:
 ### Scenario 1
 > Create a ClusterIP service named `backend-svc` for pods with label `app=backend`, port 8080.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -223,7 +223,7 @@ spec:
 ### Scenario 2
 > Expose deployment `api` on NodePort 30080.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml

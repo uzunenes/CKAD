@@ -97,7 +97,7 @@ graph LR
 
 **What does this do?** We're starting a web server. nginx is one of the most popular web servers.
 
-<details>
+<details open>
 <summary>💡 Hint</summary>
 
 ```bash
@@ -105,7 +105,7 @@ kubectl run <pod-name> --image=<image-name>
 ```
 </details>
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -130,7 +130,7 @@ kubectl get pods
 
 **Task:** Watch the Pod transition to `Running` state.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -161,7 +161,7 @@ If there's an error:
 
 **What's this for?** This is the most important command for debugging!
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -190,7 +190,7 @@ kubectl describe pod my-first-pod
 
 **What's this for?** YAML = Infrastructure as Code. Keep all settings in a file, use version control.
 
-<details>
+<details open>
 <summary>💡 Hint - Exam Trick!</summary>
 
 You don't need to memorize YAML! Kubernetes gives you a template:
@@ -203,7 +203,7 @@ kubectl run redis-pod --image=redis:alpine --labels=app=cache --dry-run=client -
 `-o yaml` → Output in YAML format
 </details>
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -240,7 +240,7 @@ spec:
 
 **What's this for?** What's happening inside the container? Any errors? Logs will tell you.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -266,7 +266,7 @@ kubectl logs my-first-pod --previous
 
 **What's this for?** Debug inside the container, check files, test network.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -296,7 +296,7 @@ kubectl exec -it my-first-pod -- /bin/sh
 
 **What's this for?** Labels are Kubernetes' "search engine". Find what you want among thousands of pods!
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -320,7 +320,7 @@ kubectl label pod my-first-pod env-
 
 **Task:** Delete the pods you created.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -350,7 +350,7 @@ Solve these scenarios with a timer! Target: < 2 minutes each
 ### Scenario 1
 > Create a pod named `test-pod` using `busybox` image. The pod should run `sleep 3600` command.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -363,7 +363,7 @@ kubectl run test-pod --image=busybox --command -- sleep 3600
 ### Scenario 2
 > Create a pod named `webapp` using `nginx:1.21` image with label `tier=frontend`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -376,7 +376,7 @@ kubectl run webapp --image=nginx:1.21 --labels=tier=frontend
 ### Scenario 3
 > Find which node the `webapp` pod is running on.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash

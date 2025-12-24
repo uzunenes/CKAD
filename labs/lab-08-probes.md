@@ -34,7 +34,7 @@ graph TB
 
 **Task:** Create a pod with HTTP liveness probe.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -59,7 +59,7 @@ spec:
 
 ### Exercise 2: TCP Liveness Probe
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -85,7 +85,7 @@ spec:
 
 **Task:** Run a command to check health.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -114,7 +114,7 @@ spec:
 
 **Task:** Pod only receives traffic when ready.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -139,7 +139,7 @@ spec:
 
 ### Exercise 5: Both Probes
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -184,7 +184,7 @@ spec:
 
 For slow-starting applications.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -217,7 +217,7 @@ spec:
 ### Scenario 1
 > Create a pod `web-health` with HTTP liveness probe on port 80, path `/health`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -241,7 +241,7 @@ spec:
 ### Scenario 2
 > Add readiness probe to existing pod checking TCP port 3306.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml

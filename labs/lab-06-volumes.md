@@ -41,7 +41,7 @@ graph TB
 
 **Task:** Create a pod with emptyDir volume shared between containers.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -77,7 +77,7 @@ spec:
 
 **Task:** Mount node's `/tmp` directory into a pod.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -109,7 +109,7 @@ spec:
 
 **Task:** Create a PersistentVolume.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -148,7 +148,7 @@ kubectl get pvc
 
 ### Exercise 4: Use PVC in Pod
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -176,7 +176,7 @@ spec:
 
 K3s includes `local-path` provisioner for automatic PV creation.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -217,7 +217,7 @@ kubectl get pvc
 ### Scenario 1
 > Create a pod with emptyDir volume mounted at `/cache`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -243,7 +243,7 @@ spec:
 ### Scenario 2
 > Create PVC named `data-pvc` requesting 2Gi storage.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml

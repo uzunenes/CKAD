@@ -31,7 +31,7 @@ graph LR
 
 ### Exercise 1: Set Resource Requests and Limits
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -79,7 +79,7 @@ spec:
 
 **Task:** Set default limits for a namespace.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -111,7 +111,7 @@ spec:
 
 **Task:** Limit total resources in a namespace.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -138,7 +138,7 @@ kubectl describe quota ns-quota
 
 ### Exercise 6: View Resource Usage
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -160,7 +160,7 @@ kubectl describe pod <pod-name> | grep -A5 "Limits"
 ### Scenario 1
 > Create a pod with 100m CPU request and 200m CPU limit.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -185,7 +185,7 @@ spec:
 ### Scenario 2
 > Create ResourceQuota limiting namespace to 5 pods.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml

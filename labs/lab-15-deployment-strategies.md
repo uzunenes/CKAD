@@ -36,7 +36,7 @@ graph TB
 
 ### Exercise 1: Blue Deployment
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -66,7 +66,7 @@ spec:
 
 ### Exercise 2: Service (Point to Blue)
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -87,7 +87,7 @@ spec:
 
 ### Exercise 3: Green Deployment
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -117,7 +117,7 @@ spec:
 
 ### Exercise 4: Switch Blue → Green
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -136,7 +136,7 @@ Instant switch! All traffic goes to green.
 
 10% traffic to canary.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -201,7 +201,7 @@ spec:
 
 ### Exercise 6: Scale Up Canary
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -218,7 +218,7 @@ kubectl scale deployment app-canary --replicas=5
 ### Scenario 1
 > `web-blue` deployment exists. Create `web-green` and switch `web-svc` to green.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash

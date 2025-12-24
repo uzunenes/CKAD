@@ -50,7 +50,7 @@ graph TB
 - Container 1: `nginx` (name: web)
 - Container 2: `busybox` (name: sidecar), runs `sleep 3600`
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -81,7 +81,7 @@ kubectl get pods two-containers
 
 **Task:** Connect to the `sidecar` container in `two-containers` pod.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -109,7 +109,7 @@ graph LR
     end
 ```
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -158,7 +158,7 @@ sequenceDiagram
 
 **Task:** Add an init container that prepares a file before main container starts.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -195,7 +195,7 @@ spec:
 
 **Task:** Create two init containers that run sequentially.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -227,7 +227,7 @@ Init containers run sequentially. One must finish before the next starts.
 
 **Task:** Test that containers in the same pod can communicate via localhost.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -263,7 +263,7 @@ Containers in the same pod communicate via `localhost`!
 > - Container 1: `nginx` (name: app)
 > - Container 2: `busybox` (name: logger), runs `sleep 3600`
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -286,7 +286,7 @@ spec:
 ### Scenario 2
 > Create a pod with init container. Init container runs `wget -O /data/index.html http://info.cern.ch`. Main container is nginx and serves this file.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml

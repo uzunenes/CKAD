@@ -33,7 +33,7 @@ graph TB
 
 **Task:** Create a pod running as non-root user.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -63,7 +63,7 @@ kubectl logs security-pod
 
 ### Exercise 2: readOnlyRootFilesystem
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -91,7 +91,7 @@ spec:
 
 ### Exercise 3: Capabilities
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -115,7 +115,7 @@ spec:
 
 ### Exercise 4: allowPrivilegeEscalation
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -141,7 +141,7 @@ spec:
 
 ### Exercise 5: Create ServiceAccount
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -159,7 +159,7 @@ kubectl describe sa my-sa
 
 ### Exercise 6: Use ServiceAccount in Pod
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -180,7 +180,7 @@ spec:
 
 ### Exercise 7: Disable Token Mount
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -205,7 +205,7 @@ spec:
 ### Scenario 1
 > Create a pod running as user 1000, group 3000, with readOnlyRootFilesystem.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -231,7 +231,7 @@ spec:
 ### Scenario 2
 > Create ServiceAccount `backend-sa` and use it in a pod named `backend`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash

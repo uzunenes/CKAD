@@ -39,7 +39,7 @@ graph TB
 
 **Task:** Create a ConfigMap named `app-config` with key `APP_ENV=production`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -57,7 +57,7 @@ kubectl describe cm app-config
 
 ### Exercise 2: Create ConfigMap (from file)
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -75,7 +75,7 @@ kubectl create configmap file-config --from-file=config.txt
 
 **Task:** Use ConfigMap values as environment variables in a pod.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -110,7 +110,7 @@ env:
 
 **Task:** Mount ConfigMap as a file.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -141,7 +141,7 @@ spec:
 
 **Task:** Create a Secret named `db-secret` with `DB_PASSWORD=mysecret123`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -160,7 +160,7 @@ kubectl get secret db-secret -o yaml  # Base64 encoded
 
 ### Exercise 6: Decode Secret
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -176,7 +176,7 @@ kubectl get secret db-secret -o jsonpath='{.data.DB_PASSWORD}' | base64 -d
 
 ### Exercise 7: Secret as Environment Variable
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -202,7 +202,7 @@ spec:
 
 ### Exercise 8: Secret as Volume
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -233,7 +233,7 @@ spec:
 ### Scenario 1
 > Create ConfigMap `webapp-config` with `THEME=dark` and `CACHE_TTL=3600`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -246,7 +246,7 @@ kubectl create cm webapp-config --from-literal=THEME=dark --from-literal=CACHE_T
 ### Scenario 2
 > Create a pod that uses `webapp-config` as environment variables.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml

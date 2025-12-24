@@ -32,7 +32,7 @@ graph TB
 
 ### Exercise 1: Simple Dockerfile
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -79,7 +79,7 @@ EOF
 
 ### Exercise 3: Python App Dockerfile
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```dockerfile
@@ -110,7 +110,7 @@ graph LR
     S1[Stage 1: Build<br/>golang:1.19] --> |copy binary| S2[Stage 2: Runtime<br/>alpine]
 ```
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```dockerfile
@@ -138,7 +138,7 @@ Multi-stage benefits:
 
 ### Exercise 5: Security Best Practices
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```dockerfile
@@ -176,7 +176,7 @@ Best practices:
 
 ### Exercise 6: .dockerignore
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -199,7 +199,7 @@ EOF
 
 K3s uses containerd. To import images:
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -228,7 +228,7 @@ RUN apt-get install python3
 CMD python3 app.py
 ```
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```dockerfile

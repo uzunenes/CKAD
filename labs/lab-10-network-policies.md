@@ -39,7 +39,7 @@ graph TB
 
 **Task:** Block all traffic to pods.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -61,7 +61,7 @@ spec:
 
 **Task:** Allow traffic from frontend to backend.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -92,7 +92,7 @@ spec:
 
 **Task:** Allow traffic from specific namespace.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -118,7 +118,7 @@ spec:
 
 **Task:** Allow DNS resolution.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -143,7 +143,7 @@ spec:
 
 ### Exercise 5: Combined Rules
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -180,7 +180,7 @@ spec:
 ### Scenario 1
 > Create NetworkPolicy that allows ingress to pods labeled `app=web` only from pods labeled `app=api` on port 80.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -209,7 +209,7 @@ spec:
 ### Scenario 2
 > Create default deny egress policy for all pods.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml

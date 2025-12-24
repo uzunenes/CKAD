@@ -49,7 +49,7 @@ cd kustomize-demo
 
 ### Exercise 1: Create Base
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -88,7 +88,7 @@ EOF
 
 ### Exercise 2: Dev Overlay
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -115,7 +115,7 @@ EOF
 
 ### Exercise 3: Prod Overlay
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -146,7 +146,7 @@ EOF
 
 ### Exercise 4: Build and Preview
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -165,7 +165,7 @@ kubectl kustomize overlays/prod > prod-manifests.yaml
 
 ### Exercise 5: Apply with Kustomize
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -181,7 +181,7 @@ kubectl get all -l env=development
 
 ### Exercise 6: Patches
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -233,7 +233,7 @@ EOF
 ### Scenario 1
 > Apply `base/` with namespace `production`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash

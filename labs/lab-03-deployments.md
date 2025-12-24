@@ -38,7 +38,7 @@ Deployment provides:
 
 **Task:** Create a deployment named `web-deploy` using `nginx` image with 3 replicas.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -59,7 +59,7 @@ kubectl get pods
 
 **Task:** Create a deployment using a YAML file.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -118,7 +118,7 @@ graph LR
 
 **Task:** Scale `web-deploy` to 5 replicas.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -152,7 +152,7 @@ sequenceDiagram
 
 **Task:** Update `web-deploy` image to `nginx:1.21`.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -170,7 +170,7 @@ kubectl rollout status deployment/web-deploy
 
 **Task:** View deployment update history.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -188,7 +188,7 @@ kubectl rollout history deployment/web-deploy --revision=1
 
 **Task:** Rollback deployment to previous version.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -230,7 +230,7 @@ spec:
 
 **Task:** Pause rollout, make multiple changes, then resume.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -253,7 +253,7 @@ kubectl rollout resume deployment/web-deploy
 ### Scenario 1
 > Create a deployment named `frontend` using `httpd:2.4` image with 4 replicas.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -266,7 +266,7 @@ kubectl create deployment frontend --image=httpd:2.4 --replicas=4
 ### Scenario 2
 > Update `frontend` image to `httpd:alpine`. Then rollback to revision 1.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -281,7 +281,7 @@ kubectl rollout undo deployment/frontend --to-revision=1
 ### Scenario 3
 > Create a redis deployment named `backend` with 2 replicas. Then scale to 6 replicas.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash

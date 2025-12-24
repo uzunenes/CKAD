@@ -33,7 +33,7 @@ graph LR
 
 **Task:** Create a Job that prints "Hello CKAD" and exits.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -52,7 +52,7 @@ kubectl logs <pod-name>
 
 ### Exercise 2: Job YAML
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -78,7 +78,7 @@ spec:
 
 **Task:** Create a Job that runs 5 times.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -103,7 +103,7 @@ spec:
 
 ### Exercise 4: Job Cleanup
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -120,7 +120,7 @@ spec:
 
 **Task:** Create a CronJob that runs every minute.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -160,7 +160,7 @@ kubectl get jobs  # A new job each minute
 
 ### Exercise 7: CronJob YAML
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -192,7 +192,7 @@ spec:
 | **Forbid** | Skip if previous running |
 | **Replace** | Replace previous job |
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```yaml
@@ -208,7 +208,7 @@ spec:
 ### Scenario 1
 > Create a Job named `count-job` that counts from 1 to 10.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
@@ -221,7 +221,7 @@ kubectl create job count-job --image=busybox -- sh -c "for i in $(seq 1 10); do 
 ### Scenario 2
 > Create a CronJob named `report-cron` that runs every 5 minutes.
 
-<details>
+<details open>
 <summary>✅ Solution</summary>
 
 ```bash
